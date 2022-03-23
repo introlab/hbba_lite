@@ -1,0 +1,40 @@
+name: pull-request-audit
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: catkin_ws/src/hbba_lite
+
+      - uses: ros-tooling/setup-ros@v0.2
+        with:
+          required-ros-distributions: noetic
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgecode-dev
+
+      - name: Compile packages in ROS workspace
+        working-directory: catkin_ws
+        run: |
+          source /opt/ros/noetic/setup.bash
+          catkin_make -j1
+
+      - name: Run tests
+        run: |
+          source /opt/ros/noetic/setup.bash
+          catkin_make run_tests
