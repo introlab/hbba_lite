@@ -35,6 +35,7 @@ jobs:
           catkin_make -j1
 
       - name: Run tests
+        working-directory: catkin_ws
         run: |
           source /opt/ros/noetic/setup.bash
           catkin_make run_tests
