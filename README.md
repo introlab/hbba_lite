@@ -11,11 +11,19 @@ The main differences are :
 - It use [Gecode](https://www.gecode.org/) instead of [OR-Tools](https://developers.google.com/optimization) for the
   solver.
 
+## Dependencies
+
+These dependencies need to be installed, in addition to ROS:
+
+```bash
+sudo apt install -y libgecode-dev
+```
+
 ## How to use?
 
 ### Create Motivation Modules
 
-See the [demos](../demos).
+See the [demos](https://github.com/introlab/t-top/tree/main/ros/demos) for the [T-Top](https://github.com/introlab/t-top) robot.
 
 ### Adding a Filter to C++ Nodes
 
