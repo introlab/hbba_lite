@@ -94,7 +94,7 @@ BaseStrategy::BaseStrategy(
     }
 }
 
-inline void BaseStrategy::onEnabling(const std::unique_ptr<Desire>& desire)
+void BaseStrategy::onEnabling(const std::unique_ptr<Desire>& desire)
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
@@ -102,7 +102,7 @@ inline void BaseStrategy::onEnabling(const std::unique_ptr<Desire>& desire)
     }
 }
 
-inline void BaseStrategy::onDisabling()
+void BaseStrategy::onDisabling()
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
