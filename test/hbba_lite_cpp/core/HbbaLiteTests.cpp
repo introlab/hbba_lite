@@ -115,11 +115,11 @@ TEST(HbbaLiteTests, onDesireSetChange_shouldEnableDisableStrategies)
     auto desire = make_unique<DesireD>();
     auto id = desire->id();
     desireSet->addDesire(move(desire));
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
     EXPECT_EQ(filterPool->counts["fa"], 1);
 
     desireSet->removeDesire(id);
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
     EXPECT_EQ(filterPool->counts["fa"], 0);
 }
 
@@ -150,7 +150,7 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
     auto desire = make_unique<DesireC>();
     auto id = desire->id();
     desireSet->addDesire(move(desire));
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
 
     std::vector<std::string> expectedStrategies = {
         std::string(type_index(typeid(DesireC)).name()).append("::(u:10; r:{ra:10}; f:{fa:THROTTLING=1})"),
@@ -166,7 +166,7 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
         desireSet->addDesire(move(desire2));
     }
 
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
     std::vector<std::string> expectedStrategies2a = {
         std::string(type_index(typeid(DesireD)).name()).append("::(u:10; r:{ra:10}; f:{fb:THROTTLING=1; fc:ON_OFF})"),
     };
@@ -204,7 +204,7 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
     auto desire = make_unique<DesireC>();
     auto id = desire->id();
     desireSet->addDesire(move(desire));
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
 
     std::vector<std::string> expectedDesireNames = {
         std::string(type_index(typeid(DesireC)).name()),
@@ -220,7 +220,7 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
         desireSet->addDesire(move(desire2));
     }
 
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
     std::vector<std::string> expectedDesireNames2 = {
         std::string(type_index(typeid(DesireD)).name()),
     };
@@ -273,7 +273,7 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldOnlyReturnDesireNameWithBiggestIn
         desireSet->addDesire(move(desireD));
     }
 
-    this_thread::sleep_for(10ms);
+    this_thread::sleep_for(20ms);
     std::vector<std::string> expectedDesireNames = {
         std::string(type_index(typeid(DesireB)).name()),
     };
