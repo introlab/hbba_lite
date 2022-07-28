@@ -44,7 +44,7 @@ class DesireSet
     bool m_isTransactionStarted;
     bool m_hasChanged;
 
-    uint64_t m_updateCount; // To monitor changes during observer calls
+    uint64_t m_updateCount;  // To monitor changes during observer calls
 
 public:
     DesireSet();
