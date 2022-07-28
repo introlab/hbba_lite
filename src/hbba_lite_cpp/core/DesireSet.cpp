@@ -16,7 +16,7 @@ DesireSetTransaction::~DesireSetTransaction()
     }
 }
 
-DesireSet::DesireSet() : m_isTransactionStarted(false), m_hasChanged(false) {}
+DesireSet::DesireSet() : m_isTransactionStarted(false), m_hasChanged(false), m_updateCount(0) {}
 
 void DesireSet::addObserver(DesireSetObserver* observer)
 {
@@ -158,14 +158,19 @@ void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
     {
         return;
     }
+    m_updateCount++;
 
     vector<unique_ptr<Desire>> enabledDesires = getEnabledDesires();
 
-    desireLock.release();
-
+    uint64_t updateCountAtBeginning = m_updateCount;
     lock_guard<recursive_mutex> lock(m_observerMutex);
     for (auto& observer : m_observers)
     {
+        if (updateCountAtBeginning != m_updateCount)
+        {
+            break;  // The previous observer has changed the desire set.
+        }
+
         observer->onDesireSetChanged(enabledDesires);
     }
 
