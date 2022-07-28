@@ -159,6 +159,7 @@ void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
         return;
     }
     m_updateCount++;
+    m_hasChanged = false;
 
     vector<unique_ptr<Desire>> enabledDesires = getEnabledDesires();
 
@@ -173,6 +174,4 @@ void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
 
         observer->onDesireSetChanged(enabledDesires);
     }
-
-    m_hasChanged = false;
 }
