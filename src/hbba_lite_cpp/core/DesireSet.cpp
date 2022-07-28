@@ -20,13 +20,13 @@ DesireSet::DesireSet() : m_isTransactionStarted(false), m_hasChanged(false) {}
 
 void DesireSet::addObserver(DesireSetObserver* observer)
 {
-    lock_guard<mutex> lock(m_observerMutex);
+    lock_guard<recursive_mutex> lock(m_observerMutex);
     m_observers.emplace(observer);
 }
 
 void DesireSet::removeObserver(DesireSetObserver* observer)
 {
-    lock_guard<mutex> lock(m_observerMutex);
+    lock_guard<recursive_mutex> lock(m_observerMutex);
     m_observers.erase(observer);
 }
 
@@ -163,7 +163,7 @@ void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
 
     desireLock.release();
 
-    lock_guard<mutex> lock(m_observerMutex);
+    lock_guard<recursive_mutex> lock(m_observerMutex);
     for (auto& observer : m_observers)
     {
         observer->onDesireSetChanged(enabledDesires);
