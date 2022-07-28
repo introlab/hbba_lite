@@ -39,7 +39,7 @@ class DesireSet
     std::unordered_map<uint64_t, std::unique_ptr<Desire>> m_desiresById;
     std::unordered_set<DesireSetObserver*> m_observers;
 
-    std::mutex m_observerMutex;
+    std::recursive_mutex m_observerMutex;
     std::recursive_mutex m_desireMutex;
     bool m_isTransactionStarted;
     bool m_hasChanged;
