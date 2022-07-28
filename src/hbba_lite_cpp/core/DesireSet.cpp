@@ -168,7 +168,7 @@ void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
     {
         if (updateCountAtBeginning != m_updateCount)
         {
-            break; // The previous observer has changed
+            break; // The previous observer has changed the desire set.
         }
 
         observer->onDesireSetChanged(enabledDesires);
