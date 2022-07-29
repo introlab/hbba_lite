@@ -47,7 +47,7 @@ TEST(DesireSetTests, addDesire_shouldAddTheDesireAndCallTheObservers)
     DesireSet testee;
 
     testee.addObserver(&observer);
-    testee.addDesire(desire.clone());
+    EXPECT_EQ(testee.addDesire(desire.clone()), desire.id());
 
     ASSERT_EQ(observer.desires.size(), 1);
     ASSERT_EQ(observer.desires[0].size(), 1);
