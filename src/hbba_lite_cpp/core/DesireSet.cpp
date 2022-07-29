@@ -37,12 +37,17 @@ DesireSetTransaction DesireSet::beginTransaction()
     return move(DesireSetTransaction(*this, move(lock)));
 }
 
-void DesireSet::addDesire(unique_ptr<Desire>&& desire)
+uint64_t DesireSet::addDesire(unique_ptr<Desire>&& desire)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
-    m_desiresById[desire->id()] = move(desire);
+
+    uint64_t id = desire->id();
+    m_desiresById[id] = move(desire);
+
     m_hasChanged = true;
     callObservers(move(lock));
+
+    return id;
 }
 
 void DesireSet::removeDesire(uint64_t id)
