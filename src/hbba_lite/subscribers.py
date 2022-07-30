@@ -42,7 +42,7 @@ class ThrottlingHbbaSubscriber(_HbbaSubscriber):
 
 class _HbbaTimeSynchronizer:
     def __init__(self, message_filter_subscribers, filter_state_class, callback, state_service_name,
-                queue_size):
+                 queue_size):
         self._callback = callback
 
         self._filter_state = filter_state_class(state_service_name)
@@ -70,12 +70,12 @@ class OnOffHbbaTimeSynchronizer(_HbbaTimeSynchronizer):
 class ThrottlingHbbaTimeSynchronizer(_HbbaTimeSynchronizer):
     def __init__(self, message_filter_subscribers, queue_size, callback=None, state_service_name=None):
         super(ThrottlingHbbaTimeSynchronizer, self).__init__(message_filter_subscribers, ThrottlingHbbaFilterState,
-                                                        callback, state_service_name, queue_size)
+                                                             callback, state_service_name, queue_size)
 
 
 class _HbbaApproximateTimeSynchronizer:
     def __init__(self, message_filter_subscribers, filter_state_class, callback, state_service_name,
-                queue_size, slop, allow_headerless):
+                 queue_size, slop, allow_headerless):
         self._callback = callback
 
         self._filter_state = filter_state_class(state_service_name)

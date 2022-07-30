@@ -63,11 +63,11 @@ public:
     void removeDesire(uint64_t id);
     void clear();
 
-    template <class T>
+    template<class T>
     void removeAllDesiresOfType();
     void removeAllDesiresOfType(std::type_index type);
 
-    template <class T>
+    template<class T>
     bool containsAnyDesiresOfType();
     bool containsAnyDesiresOfType(std::type_index type);
     bool contains(uint64_t id);
@@ -89,13 +89,13 @@ uint64_t DesireSet::addDesire(Types... args)
     return addDesire(std::make_unique<D>(&args...));
 }
 
-template <class T>
+template<class T>
 void DesireSet::removeAllDesiresOfType()
 {
     removeAllDesiresOfType(std::type_index(typeid(T)));
 }
 
-template <class T>
+template<class T>
 bool DesireSet::containsAnyDesiresOfType()
 {
     return containsAnyDesiresOfType(std::type_index(typeid(T)));

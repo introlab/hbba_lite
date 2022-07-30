@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 
 import rospy
 
-from hbba_lite.srv import SetOnOffFilterState, SetOnOffFilterStateResponse, SetThrottlingFilterState, SetThrottlingFilterStateResponse
+from hbba_lite.srv import SetOnOffFilterState, SetOnOffFilterStateResponse, SetThrottlingFilterState, \
+    SetThrottlingFilterStateResponse
 
 
 class _HbbaFilterState(ABC):
@@ -49,7 +50,7 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
         self._user_callback = None
 
     def _state_service_callback(self, request):
-        if request.rate <= 0 :
+        if request.rate <= 0:
             return SetThrottlingFilterStateResponse(ok=False)
 
         previous_is_filtering_all_messages = self._is_filtering_all_messages
@@ -58,7 +59,8 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
         self._rate = request.rate
         self._counter = 0
         if self._user_callback is not None:
-            self._user_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages, previous_rate, self._rate)
+            self._user_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages, previous_rate,
+                                self._rate)
 
         return SetThrottlingFilterStateResponse(ok=True)
 
