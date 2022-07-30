@@ -56,11 +56,21 @@ public:
 
     DesireSetTransaction beginTransaction();
 
+    template<class D, class... Types>
+    uint64_t addDesire(Types... args);
     uint64_t addDesire(std::unique_ptr<Desire>&& desire);
+
     void removeDesire(uint64_t id);
-    void removeDesires(std::type_index type);
-    bool contains(uint64_t id);
     void clear();
+
+    template <class T>
+    void removeAllDesiresOfType();
+    void removeAllDesiresOfType(std::type_index type);
+
+    template <class T>
+    bool containsAnyDesiresOfType();
+    bool containsAnyDesiresOfType(std::type_index type);
+    bool contains(uint64_t id);
 
     void enableAllDesires();
     void disableAllDesires();
@@ -72,5 +82,23 @@ private:
     std::vector<std::unique_ptr<Desire>> getEnabledDesires();
     friend DesireSetTransaction;
 };
+
+template<class D, class... Types>
+uint64_t DesireSet::addDesire(Types... args)
+{
+    return addDesire(std::make_unique<D>(&args...));
+}
+
+template <class T>
+void DesireSet::removeAllDesiresOfType()
+{
+    removeAllDesiresOfType(std::type_index(typeid(T)));
+}
+
+template <class T>
+bool DesireSet::containsAnyDesiresOfType()
+{
+    return containsAnyDesiresOfType(std::type_index(typeid(T)));
+}
 
 #endif

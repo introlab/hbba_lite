@@ -1,5 +1,7 @@
 #include <hbba_lite/core/DesireSet.h>
 
+#include <algorithm>
+
 using namespace std;
 
 DesireSetTransaction::DesireSetTransaction(DesireSet& desireSet, unique_lock<recursive_mutex>&& lock)
@@ -60,7 +62,18 @@ void DesireSet::removeDesire(uint64_t id)
     callObservers(move(lock));
 }
 
-void DesireSet::removeDesires(type_index type)
+void DesireSet::clear()
+{
+    unique_lock<recursive_mutex> lock(m_desireMutex);
+    if (!m_desiresById.empty())
+    {
+        m_hasChanged = true;
+    }
+    m_desiresById.clear();
+    callObservers(move(lock));
+}
+
+void DesireSet::removeAllDesiresOfType(type_index type)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     size_t sizeBefore = m_desiresById.size();
@@ -84,22 +97,20 @@ void DesireSet::removeDesires(type_index type)
     callObservers(move(lock));
 }
 
+bool DesireSet::containsAnyDesiresOfType(type_index type)
+{
+    unique_lock<recursive_mutex> lock(m_desireMutex);
+    return any_of(m_desiresById.begin(), m_desiresById.end(), [=](const auto& p)
+    {
+        return p.second->type() == type;
+    });
+}
+
 bool DesireSet::contains(uint64_t id)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     auto it = m_desiresById.find(id);
     return it != m_desiresById.end();
-}
-
-void DesireSet::clear()
-{
-    unique_lock<recursive_mutex> lock(m_desireMutex);
-    if (!m_desiresById.empty())
-    {
-        m_hasChanged = true;
-    }
-    m_desiresById.clear();
-    callObservers(move(lock));
 }
 
 void DesireSet::enableAllDesires()
@@ -138,7 +149,7 @@ void DesireSet::endTransaction(unique_lock<recursive_mutex> lock)
     callObservers(move(lock));
 }
 
-std::vector<std::unique_ptr<Desire>> DesireSet::getEnabledDesires()
+vector<unique_ptr<Desire>> DesireSet::getEnabledDesires()
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     if (m_isTransactionStarted)
