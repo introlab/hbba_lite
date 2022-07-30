@@ -100,10 +100,7 @@ void DesireSet::removeAllDesiresOfType(type_index type)
 bool DesireSet::containsAnyDesiresOfType(type_index type)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
-    return any_of(m_desiresById.begin(), m_desiresById.end(), [=](const auto& p)
-    {
-        return p.second->type() == type;
-    });
+    return any_of(m_desiresById.begin(), m_desiresById.end(), [=](const auto& p) { return p.second->type() == type; });
 }
 
 bool DesireSet::contains(uint64_t id)
