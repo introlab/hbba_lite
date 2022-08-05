@@ -86,7 +86,7 @@ private:
 template<class D, class... Types>
 uint64_t DesireSet::addDesire(Types... args)
 {
-    return addDesire(std::make_unique<D>(&args...));
+    return addDesire(std::make_unique<D>(args...));
 }
 
 template<class T>
