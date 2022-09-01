@@ -9,7 +9,7 @@
 using namespace std;
 
 
-class StrategyTestee : public Strategy<int>
+class StrategyTestee : public Strategy<DesireC>
 {
 public:
     int onEnablingCount;
@@ -141,7 +141,7 @@ TEST(StrategyTests, getters_shouldReturnTheRightValues)
     EXPECT_EQ(testee.utility(), 1);
     EXPECT_EQ(testee.resourcesByName(), EXPECTED_RESOURCES);
     EXPECT_EQ(testee.filterConfigurationsByName(), EXPECTED_FILTER_CONFIGURATIONS);
-    EXPECT_EQ(testee.desireType(), type_index(typeid(int)));
+    EXPECT_EQ(testee.desireType(), DesireType::get<DesireC>());
 }
 
 TEST(StrategyTests, enableDisable_shouldChangeOnceTheState)

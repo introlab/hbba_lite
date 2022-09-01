@@ -5,10 +5,96 @@
 #include <atomic>
 #include <memory>
 #include <typeindex>
+#include <type_traits>
+
+class Desire;
+
+class DesireType
+{
+    std::type_index m_type;
+
+    explicit DesireType(std::type_index type);
+
+public:
+    template<class T>
+    static DesireType get();
+    static DesireType null();
+
+    bool operator==(const DesireType& other) const;
+    bool operator!=(const DesireType& other) const;
+    bool operator<(const DesireType& other) const;
+    bool operator<=(const DesireType& other) const;
+    bool operator>(const DesireType& other) const;
+    bool operator>=(const DesireType& other) const;
+
+    const char* name() const;
+    std::size_t hashCode() const;
+};
+
+template<class T>
+inline DesireType DesireType::get()
+{
+    static_assert(std::is_base_of<Desire, T>::value, "T must be a subclass of Desire");
+    return DesireType(std::type_index(typeid(T)));
+}
+
+inline DesireType DesireType::null()
+{
+    return DesireType(std::type_index(typeid(std::nullptr_t)));
+}
+
+inline bool DesireType::operator==(const DesireType& other) const
+{
+    return m_type == other.m_type;
+}
+
+inline bool DesireType::operator!=(const DesireType& other) const
+{
+    return m_type != other.m_type;
+}
+
+inline bool DesireType::operator<(const DesireType& other) const
+{
+    return m_type < other.m_type;
+}
+
+inline bool DesireType::operator<=(const DesireType& other) const
+{
+    return m_type <= other.m_type;
+}
+
+inline bool DesireType::operator>(const DesireType& other) const
+{
+    return m_type > other.m_type;
+}
+
+inline bool DesireType::operator>=(const DesireType& other) const
+{
+    return m_type >= other.m_type;
+}
+
+inline const char* DesireType::name() const
+{
+    return m_type.name();
+}
+
+inline std::size_t DesireType::hashCode() const
+{
+    return m_type.hash_code();
+}
+
+namespace std
+{
+    template<>
+    struct hash<DesireType>
+    {
+        inline std::size_t operator()(const DesireType& type) const { return type.hashCode(); }
+    };
+}
 
 #define DECLARE_DESIRE_METHODS(className)                                                                              \
     std::unique_ptr<Desire> clone() override { return std::make_unique<className>(*this); }                            \
-    std::type_index type() override { return std::type_index(typeid(className)); }
+    DesireType type() override { return DesireType::get<className>(); }
 
 class Desire
 {
@@ -27,7 +113,7 @@ public:
     bool enabled() const;
 
     virtual std::unique_ptr<Desire> clone() = 0;
-    virtual std::type_index type() = 0;
+    virtual DesireType type() = 0;
 
     void enable();
     void disable();

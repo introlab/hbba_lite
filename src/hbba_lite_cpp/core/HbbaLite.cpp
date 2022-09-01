@@ -45,7 +45,7 @@ void HbbaLite::onDesireSetChanged(const vector<unique_ptr<Desire>>& enabledDesir
     m_pendingDesiresSemaphore.release();
 }
 
-void HbbaLite::checkStrategyResources(type_index desireType, const unordered_map<string, uint16_t>& resourcesByNames)
+void HbbaLite::checkStrategyResources(DesireType desireType, const unordered_map<string, uint16_t>& resourcesByNames)
 {
     for (auto& pair : resourcesByNames)
     {
@@ -88,7 +88,7 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
     auto results = m_solver->solve(desires, m_strategiesByDesireType, m_resourcesByNames);
 
     // After the loop iterating the results, this set will contain the strategies that need to be disabled.
-    unordered_set<pair<type_index, size_t>> enabledStrategies;
+    unordered_set<pair<DesireType, size_t>> enabledStrategies;
 
     // After the loop iterating the results, this vector will contain the strategies that need to be enabled.
     vector<pair<size_t, unique_ptr<Desire>&>> strategiesToEnable;
@@ -108,7 +108,7 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
     {
         auto& desire = desires[result.desireIndex];
         auto desireType = desire->type();
-        auto p = pair<type_index, size_t>(desireType, result.strategyIndex);
+        auto p = pair<DesireType, size_t>(desireType, result.strategyIndex);
         bool toBeEnabled = enabledStrategies.count(p) == 0;
         auto& strategy = m_strategiesByDesireType[p.first][p.second];
 

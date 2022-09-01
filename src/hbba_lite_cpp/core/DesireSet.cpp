@@ -73,7 +73,7 @@ void DesireSet::clear()
     callObservers(move(lock));
 }
 
-void DesireSet::removeAllDesiresOfType(type_index type)
+void DesireSet::removeAllDesiresOfType(DesireType type)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     size_t sizeBefore = m_desiresById.size();
@@ -97,7 +97,7 @@ void DesireSet::removeAllDesiresOfType(type_index type)
     callObservers(move(lock));
 }
 
-bool DesireSet::containsAnyDesiresOfType(type_index type)
+bool DesireSet::containsAnyDesiresOfType(DesireType type)
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     return any_of(m_desiresById.begin(), m_desiresById.end(), [=](const auto& p) { return p.second->type() == type; });

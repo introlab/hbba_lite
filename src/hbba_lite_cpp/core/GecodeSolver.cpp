@@ -13,7 +13,7 @@ class GecodeSolverSpace : public IntMaximizeSpace
 {
     const vector<unique_ptr<Desire>>& m_desires;
     const vector<size_t>& m_mostIntenseDesiresIndexes;
-    const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& m_strategiesByDesireType;
+    const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& m_strategiesByDesireType;
     const unordered_map<string, uint16_t>& m_systemResourcesByName;
 
     // Branching variables
@@ -33,7 +33,7 @@ public:
     GecodeSolverSpace(
         const vector<unique_ptr<Desire>>& desires,
         const vector<size_t>& mostIntenseDesiresIndexes,
-        const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+        const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
         const unordered_map<string, uint16_t>& systemResourcesByName);
     GecodeSolverSpace(GecodeSolverSpace& other);
 
@@ -58,7 +58,7 @@ private:
 GecodeSolverSpace::GecodeSolverSpace(
     const vector<unique_ptr<Desire>>& desires,
     const vector<size_t>& mostIntenseDesiresIndexes,
-    const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+    const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
     const unordered_map<string, uint16_t>& systemResourcesByName)
     : m_desires(desires),
       m_mostIntenseDesiresIndexes(mostIntenseDesiresIndexes),
@@ -295,7 +295,7 @@ GecodeSolver::GecodeSolver() {}
 
 unordered_set<SolverResult> GecodeSolver::solve(
     const vector<unique_ptr<Desire>>& desires,
-    const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+    const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
     const unordered_map<string, uint16_t>& systemResourcesByName)
 {
     if (desires.empty())

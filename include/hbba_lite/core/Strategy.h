@@ -141,7 +141,7 @@ public:
     const std::unordered_map<std::string, uint16_t>& resourcesByName() const;
     const std::unordered_map<std::string, FilterConfiguration> filterConfigurationsByName() const;
 
-    virtual std::type_index desireType() = 0;
+    virtual DesireType desireType() = 0;
 
 protected:
     virtual void onEnabling(const std::unique_ptr<Desire>& desire);
@@ -208,7 +208,7 @@ public:
     DECLARE_NOT_COPYABLE(Strategy);
     DECLARE_NOT_MOVABLE(Strategy);
 
-    std::type_index desireType() override;
+    DesireType desireType() override;
 };
 
 template<class T>
@@ -222,9 +222,9 @@ Strategy<T>::Strategy(
 }
 
 template<class T>
-inline std::type_index Strategy<T>::desireType()
+inline DesireType Strategy<T>::desireType()
 {
-    return std::type_index(typeid(T));
+    return DesireType::get<T>();
 }
 
 #endif
