@@ -10,9 +10,9 @@
 using namespace std;
 
 
-bool contains(const std::string& data, const std::string& substr)
+bool contains(const string& data, const string& substr)
 {
-    return data.find(substr) != std::string::npos;
+    return data.find(substr) != string::npos;
 }
 
 class SolverMock : public Solver
@@ -24,7 +24,7 @@ public:
     // Return the strategy to activate (Desire Type, strategy index)
     virtual unordered_set<SolverResult> solve(
         const vector<unique_ptr<Desire>>& desires,
-        const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+        const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
         const unordered_map<string, uint16_t>& systemResourcesByName)
     {
         if (desires.empty())
@@ -35,17 +35,17 @@ public:
         EXPECT_EQ(desires.size(), 1);
         if (desires.size() == 1)
         {
-            EXPECT_EQ(desires[0]->type(), type_index(typeid(DesireD)));
+            EXPECT_EQ(desires[0]->type(), DesireType::get<DesireD>());
         }
 
         EXPECT_EQ(strategiesByDesireType.size(), 1);
-        auto it = strategiesByDesireType.find(type_index(typeid(DesireD)));
+        auto it = strategiesByDesireType.find(DesireType::get<DesireD>());
         if (it != strategiesByDesireType.end())
         {
             EXPECT_EQ(it->second.size(), 1);
             if (it->second.size() == 1)
             {
-                EXPECT_EQ(it->second[0]->desireType(), type_index(typeid(DesireD)));
+                EXPECT_EQ(it->second[0]->desireType(), DesireType::get<DesireD>());
             }
         }
         else
@@ -152,8 +152,8 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
     desireSet->addDesire(move(desire));
     this_thread::sleep_for(20ms);
 
-    std::vector<std::string> expectedStrategies = {
-        std::string(type_index(typeid(DesireC)).name()).append("::(u:10; r:{ra:10}; f:{fa:THROTTLING=1})"),
+    vector<string> expectedStrategies = {
+        string(DesireType::get<DesireC>().name()).append("::(u:10; r:{ra:10}; f:{fa:THROTTLING=1})"),
     };
     EXPECT_EQ(testee.getActiveStrategies(), expectedStrategies);
 
@@ -167,11 +167,11 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
     }
 
     this_thread::sleep_for(20ms);
-    std::vector<std::string> expectedStrategies2a = {
-        std::string(type_index(typeid(DesireD)).name()).append("::(u:10; r:{ra:10}; f:{fb:THROTTLING=1; fc:ON_OFF})"),
+    vector<string> expectedStrategies2a = {
+        string(DesireType::get<DesireD>().name()).append("::(u:10; r:{ra:10}; f:{fb:THROTTLING=1; fc:ON_OFF})"),
     };
-    std::vector<std::string> expectedStrategies2b = {
-        std::string(type_index(typeid(DesireD)).name()).append("::(u:10; r:{ra:10}; f:{fc:ON_OFF; fb:THROTTLING=1})"),
+    vector<string> expectedStrategies2b = {
+        string(DesireType::get<DesireD>().name()).append("::(u:10; r:{ra:10}; f:{fc:ON_OFF; fb:THROTTLING=1})"),
     };
     auto actualStrategies = testee.getActiveStrategies();
     EXPECT_TRUE(actualStrategies == expectedStrategies2a || actualStrategies == expectedStrategies2b);
@@ -206,8 +206,8 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
     desireSet->addDesire(move(desire));
     this_thread::sleep_for(20ms);
 
-    std::vector<std::string> expectedDesireNames = {
-        std::string(type_index(typeid(DesireC)).name()),
+    vector<string> expectedDesireNames = {
+        string(DesireType::get<DesireC>().name()),
     };
     EXPECT_EQ(testee.getActiveDesireNames(), expectedDesireNames);
 
@@ -221,8 +221,8 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
     }
 
     this_thread::sleep_for(20ms);
-    std::vector<std::string> expectedDesireNames2 = {
-        std::string(type_index(typeid(DesireD)).name()),
+    vector<string> expectedDesireNames2 = {
+        string(DesireType::get<DesireD>().name()),
     };
     EXPECT_EQ(testee.getActiveDesireNames(), expectedDesireNames2);
 }
@@ -274,8 +274,8 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldOnlyReturnDesireNameWithBiggestIn
     }
 
     this_thread::sleep_for(20ms);
-    std::vector<std::string> expectedDesireNames = {
-        std::string(type_index(typeid(DesireB)).name()),
+    vector<string> expectedDesireNames = {
+        string(DesireType::get<DesireB>().name()),
     };
     EXPECT_EQ(testee.getActiveDesireNames(), expectedDesireNames);
 }

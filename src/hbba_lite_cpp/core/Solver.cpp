@@ -14,7 +14,7 @@ Solver::Solver() {}
 
 void checkDesireStrategies(
     const vector<unique_ptr<Desire>>& desires,
-    const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType)
+    const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType)
 {
     for (auto& desire : desires)
     {
@@ -27,7 +27,7 @@ void checkDesireStrategies(
 }
 
 void checkStrategyResources(
-    const unordered_map<type_index, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+    const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
     const unordered_map<string, uint16_t>& systemResourcesByName)
 {
     for (auto& strategiesPair : strategiesByDesireType)
@@ -49,7 +49,7 @@ void checkStrategyResources(
 
 vector<size_t> selectMostIntenseEnabledDesireIndexes(const vector<unique_ptr<Desire>>& desires)
 {
-    unordered_map<type_index, pair<uint16_t, size_t>> mostIntenseDesiresByType;
+    unordered_map<DesireType, pair<uint16_t, size_t>> mostIntenseDesiresByType;
 
     for (size_t i = 0; i < desires.size(); i++)
     {

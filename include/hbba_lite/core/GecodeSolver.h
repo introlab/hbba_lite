@@ -14,7 +14,7 @@ public:
 
     std::unordered_set<SolverResult> solve(
         const std::vector<std::unique_ptr<Desire>>& desires,
-        const std::unordered_map<std::type_index, std::vector<std::unique_ptr<BaseStrategy>>>& strategiesByDesireType,
+        const std::unordered_map<DesireType, std::vector<std::unique_ptr<BaseStrategy>>>& strategiesByDesireType,
         const std::unordered_map<std::string, uint16_t>& systemResourcesByName) override;
 };
 

@@ -23,8 +23,8 @@ TEST(SolverTests, checkDesireStrategies_missingStrategy_shouldThrowHbbaLiteExcep
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
 
     EXPECT_THROW(checkDesireStrategies(desires, strategiesByDesireType), HbbaLiteException);
 }
@@ -43,9 +43,9 @@ TEST(SolverTests, checkDesireStrategies_emptyStrategies_shouldThrowHbbaLiteExcep
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
-    strategiesByDesireType[type_index(typeid(DesireB))].clear();
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
+    strategiesByDesireType[DesireType::get<DesireB>()].clear();
 
     EXPECT_THROW(checkDesireStrategies(desires, strategiesByDesireType), HbbaLiteException);
 }
@@ -69,9 +69,9 @@ TEST(SolverTests, checkDesireStrategies_shouldNotThrowHbbaLiteException)
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB));
 
     checkDesireStrategies(desires, strategiesByDesireType);
 }
@@ -91,9 +91,9 @@ TEST(SolverTests, checkStrategyResources_missingRessource_shouldThrowHbbaLiteExc
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}};
 
@@ -115,9 +115,9 @@ TEST(SolverTests, checkStrategyResources_shouldNotThrowHbbaLiteException)
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}, {"rb", 30}};
 

@@ -23,8 +23,8 @@ TEST(GecodeSolverTests, solve_missingStrategy_shouldThrowHbbaLiteException)
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}, {"rb", 30}};
 
@@ -51,9 +51,9 @@ TEST(GecodeSolverTests, solve_missingRessource_shouldThrowHbbaLiteException)
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}};
 
@@ -102,13 +102,13 @@ TEST(GecodeSolverTests, solve_compatibleFilters1_shouldReturnStrategiesToActivat
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA1));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA2));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA3));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB1));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB2));
-    strategiesByDesireType[type_index(typeid(DesireC))].emplace_back(move(strategyC));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA1));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA2));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA3));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB1));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB2));
+    strategiesByDesireType[DesireType::get<DesireC>()].emplace_back(move(strategyC));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}, {"rb", 30}};
 
@@ -160,13 +160,13 @@ TEST(GecodeSolverTests, solve_compatibleFilters2_shouldReturnStrategiesToActivat
         unordered_map<string, FilterConfiguration>{{"fc", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA1));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA2));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA3));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB1));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB2));
-    strategiesByDesireType[type_index(typeid(DesireC))].emplace_back(move(strategyC));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA1));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA2));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA3));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB1));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB2));
+    strategiesByDesireType[DesireType::get<DesireC>()].emplace_back(move(strategyC));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}, {"rb", 30}};
 
@@ -201,10 +201,10 @@ TEST(GecodeSolverTests, solve_incompatibleFilters1_shouldReturnStrategiesToActiv
         unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(2)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA1));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA2));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB1));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA1));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA2));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB1));
 
     unordered_map<string, uint16_t> systemResourcesByName = {};
 
@@ -254,11 +254,11 @@ TEST(GecodeSolverTests, solve_incompatibleFilters2_shouldReturnStrategiesToActiv
         unordered_map<string, FilterConfiguration>{{"fc", FilterConfiguration::throttling(1)}},
         filterPool);
 
-    unordered_map<type_index, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA1));
-    strategiesByDesireType[type_index(typeid(DesireA))].emplace_back(move(strategyA2));
-    strategiesByDesireType[type_index(typeid(DesireB))].emplace_back(move(strategyB1));
-    strategiesByDesireType[type_index(typeid(DesireC))].emplace_back(move(strategyC));
+    unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>> strategiesByDesireType;
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA1));
+    strategiesByDesireType[DesireType::get<DesireA>()].emplace_back(move(strategyA2));
+    strategiesByDesireType[DesireType::get<DesireB>()].emplace_back(move(strategyB1));
+    strategiesByDesireType[DesireType::get<DesireC>()].emplace_back(move(strategyC));
 
     unordered_map<string, uint16_t> systemResourcesByName = {{"ra", 20}};
 

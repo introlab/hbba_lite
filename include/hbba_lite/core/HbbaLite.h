@@ -18,11 +18,11 @@
 #include <set>
 
 template<>
-struct std::hash<std::pair<std::type_index, size_t>>
+struct std::hash<std::pair<DesireType, size_t>>
 {
-    std::size_t operator()(std::pair<std::type_index, size_t> const& x) const noexcept
+    std::size_t operator()(std::pair<DesireType, size_t> const& x) const noexcept
     {
-        std::size_t h1 = std::hash<std::type_index>()(x.first);
+        std::size_t h1 = std::hash<DesireType>()(x.first);
         std::size_t h2 = std::hash<size_t>()(x.second);
         return h1 ^ (h2 << 1);
     }
@@ -31,7 +31,7 @@ struct std::hash<std::pair<std::type_index, size_t>>
 class HbbaLite : public DesireSetObserver
 {
     std::shared_ptr<DesireSet> m_desireSet;
-    std::unordered_map<std::type_index, std::vector<std::unique_ptr<BaseStrategy>>> m_strategiesByDesireType;
+    std::unordered_map<DesireType, std::vector<std::unique_ptr<BaseStrategy>>> m_strategiesByDesireType;
     std::unordered_map<std::string, uint16_t> m_resourcesByNames;
     std::unique_ptr<Solver> m_solver;
 
@@ -64,7 +64,7 @@ public:
 
 private:
     void checkStrategyResources(
-        std::type_index desireType,
+        DesireType desireType,
         const std::unordered_map<std::string, uint16_t>& resourcesByNames);
 
     void run();
