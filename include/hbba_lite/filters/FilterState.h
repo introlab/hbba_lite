@@ -23,7 +23,7 @@ private:
         hbba_lite::SetOnOffFilterState::Response& response);
 };
 
-bool OnOffHbbaFilterState::isFilteringAllMessages() const
+inline bool OnOffHbbaFilterState::isFilteringAllMessages() const
 {
     return m_isFilteringAllMessages;
 }
@@ -46,7 +46,7 @@ private:
         hbba_lite::SetThrottlingFilterState::Response& response);
 };
 
-bool ThrottlingHbbaFilterState::isFilteringAllMessages() const
+inline bool ThrottlingHbbaFilterState::isFilteringAllMessages() const
 {
     return m_isFilteringAllMessages;
 }
