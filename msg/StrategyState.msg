@@ -1,0 +1,3 @@
+string desire_type_name
+string strategy_type_name
+bool enabled

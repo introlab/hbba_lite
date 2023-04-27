@@ -7,6 +7,9 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+#include <utility>
+
 using namespace std;
 
 
@@ -59,6 +62,19 @@ public:
         return {SolverResult(0, 0)};
     }
 };
+
+class StrategyStateLoggerMock : public StrategyStateLogger
+{
+public:
+    static vector<pair<DesireType, bool>> loggedValues;
+
+    void log(DesireType desireType, StrategyType strategyType, bool enabled) override
+    {
+        loggedValues.emplace_back(desireType, enabled);
+    }
+};
+
+vector<std::pair<DesireType, bool>> StrategyStateLoggerMock::loggedValues;
 
 TEST(HbbaLiteTests, constructor_invalidResourceName_shouldThrowHbbaLiteException)
 {
@@ -278,4 +294,34 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldOnlyReturnDesireNameWithBiggestIn
         string(DesireType::get<DesireB>().name()),
     };
     EXPECT_EQ(testee.getActiveDesireNames(), expectedDesireNames);
+}
+
+TEST(HbbaLiteTests, strategyStateLogger_shouldBeCalledWhenStrategiesAreEnabledOrDisabled)
+{
+    auto desireSet = make_shared<DesireSet>();
+    auto filterPool = make_shared<FilterPoolMock>();
+    auto strategyB = make_unique<Strategy<DesireB>>(
+        10,
+        unordered_map<string, uint16_t>{{"ra", 1}},
+        unordered_map<string, FilterConfiguration>{{"fa", FilterConfiguration::throttling(1)}},
+        filterPool);
+    auto solver = make_unique<GecodeSolver>();
+
+    vector<unique_ptr<BaseStrategy>> strategies;
+    strategies.emplace_back(move(strategyB));
+
+    HbbaLite testee(desireSet, move(strategies), {{"ra", 1}}, move(solver), make_unique<StrategyStateLoggerMock>());
+    EXPECT_EQ(StrategyStateLoggerMock::loggedValues.size(), 0);
+
+    desireSet->addDesire<DesireB>(1);
+    this_thread::sleep_for(20ms);
+    ASSERT_EQ(StrategyStateLoggerMock::loggedValues.size(), 1);
+    EXPECT_EQ(StrategyStateLoggerMock::loggedValues[0].first, DesireType::get<DesireB>());
+    EXPECT_TRUE(StrategyStateLoggerMock::loggedValues[0].second);
+
+    desireSet->clear();
+    this_thread::sleep_for(20ms);
+    ASSERT_EQ(StrategyStateLoggerMock::loggedValues.size(), 2);
+    EXPECT_EQ(StrategyStateLoggerMock::loggedValues[1].first, DesireType::get<DesireB>());
+    EXPECT_FALSE(StrategyStateLoggerMock::loggedValues[1].second);
 }

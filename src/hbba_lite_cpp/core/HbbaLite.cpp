@@ -7,10 +7,12 @@ HbbaLite::HbbaLite(
     shared_ptr<DesireSet> desireSet,
     vector<unique_ptr<BaseStrategy>> strategies,
     unordered_map<string, uint16_t> resourcesByNames,
-    unique_ptr<Solver> solver)
+    unique_ptr<Solver> solver,
+    unique_ptr<StrategyStateLogger> strategyStateLogger)
     : m_desireSet(move(desireSet)),
       m_resourcesByNames(move(resourcesByNames)),
       m_solver(move(solver)),
+      m_strategyStateLogger(move(strategyStateLogger)),
       m_pendingDesiresSemaphore(false),
       m_stopped(false)
 {
@@ -128,11 +130,15 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
 
     for (const auto& p : enabledStrategies)
     {
-        m_strategiesByDesireType[p.first][p.second]->disable();
+        auto& strategy = m_strategiesByDesireType[p.first][p.second];
+        strategy->disable();
+        m_strategyStateLogger->log(strategy->desireType(), strategy->strategyType(), false);
     }
     for (const auto& s : strategiesToEnable)
     {
-        m_strategiesByDesireType[s.second->type()][s.first]->enable(s.second);
+        auto& strategy = m_strategiesByDesireType[s.second->type()][s.first];
+        strategy->enable(s.second);
+        m_strategyStateLogger->log(strategy->desireType(), strategy->strategyType(), true);
     }
 
     updateActiveDesireNames(desires, results);

@@ -53,6 +53,7 @@ catkin_python_setup()
 add_message_files(
         FILES
         Int32Stamped.msg
+        StrategyState.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -134,6 +135,8 @@ add_library(${PROJECT_NAME}
         src/hbba_lite_cpp/core/RosFilterPool.cpp
         src/hbba_lite_cpp/core/Solver.cpp
         src/hbba_lite_cpp/core/GecodeSolver.cpp
+        src/hbba_lite_cpp/core/StrategyStateLogger.cpp
+        src/hbba_lite_cpp/core/RosStrategyStateLogger.cpp
         src/hbba_lite_cpp/core/HbbaLite.cpp
         )
 
