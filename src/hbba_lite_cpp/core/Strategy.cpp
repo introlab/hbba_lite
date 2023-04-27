@@ -6,6 +6,9 @@
 
 using namespace std;
 
+StrategyType::StrategyType(type_index type) : m_type(type) {}
+
+
 FilterConfiguration::FilterConfiguration() : m_type(FilterType::ON_OFF), m_rate(0) {}
 
 FilterConfiguration::FilterConfiguration(uint16_t rate) : m_type(FilterType::THROTTLING), m_rate(rate)

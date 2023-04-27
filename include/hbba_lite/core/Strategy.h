@@ -11,6 +11,34 @@
 #include <mutex>
 #include <memory>
 
+class BaseStrategy;
+
+class StrategyType
+{
+    std::type_index m_type;
+
+    explicit StrategyType(std::type_index type);
+
+public:
+    template<class T>
+    static StrategyType get();
+
+    const char* name() const;
+};
+
+template<class T>
+inline StrategyType StrategyType::get()
+{
+    static_assert(std::is_base_of<BaseStrategy, T>::value, "T must be a subclass of BaseStrategy");
+    return StrategyType(std::type_index(typeid(T)));
+}
+
+inline const char* StrategyType::name() const
+{
+    return m_type.name();
+}
+
+
 enum class FilterType
 {
     ON_OFF,
@@ -142,6 +170,7 @@ public:
     const std::unordered_map<std::string, FilterConfiguration> filterConfigurationsByName() const;
 
     virtual DesireType desireType() = 0;
+    virtual StrategyType strategyType() = 0;
 
 protected:
     virtual void onEnabling(const std::unique_ptr<Desire>& desire);
@@ -209,6 +238,7 @@ public:
     DECLARE_NOT_MOVABLE(Strategy);
 
     DesireType desireType() override;
+    StrategyType strategyType() override;
 };
 
 template<class T>
@@ -225,6 +255,12 @@ template<class T>
 inline DesireType Strategy<T>::desireType()
 {
     return DesireType::get<T>();
+}
+
+template<class T>
+inline StrategyType Strategy<T>::strategyType()
+{
+    return StrategyType::get<Strategy<T>>();
 }
 
 #endif

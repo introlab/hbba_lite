@@ -7,6 +7,7 @@
 #include <hbba_lite/core/DesireSet.h>
 #include <hbba_lite/core/Strategy.h>
 #include <hbba_lite/core/Solver.h>
+#include <hbba_lite/core/StrategyStateLogger.h>
 
 #include <atomic>
 #include <unordered_map>
@@ -34,6 +35,7 @@ class HbbaLite : public DesireSetObserver
     std::unordered_map<DesireType, std::vector<std::unique_ptr<BaseStrategy>>> m_strategiesByDesireType;
     std::unordered_map<std::string, uint16_t> m_resourcesByNames;
     std::unique_ptr<Solver> m_solver;
+    std::unique_ptr<StrategyStateLogger> m_strategyStateLogger;
 
     std::mutex m_pendingDesiresMutex;
     BinarySemaphore m_pendingDesiresSemaphore;
@@ -52,7 +54,8 @@ public:
         std::shared_ptr<DesireSet> desireSet,
         std::vector<std::unique_ptr<BaseStrategy>> strategies,
         std::unordered_map<std::string, uint16_t> resourcesByNames,
-        std::unique_ptr<Solver> solver);
+        std::unique_ptr<Solver> solver,
+        std::unique_ptr<StrategyStateLogger> strategyStateLogger = std::make_unique<StrategyStateLogger>());
     ~HbbaLite();
 
     DECLARE_NOT_COPYABLE(HbbaLite);
