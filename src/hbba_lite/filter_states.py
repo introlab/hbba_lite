@@ -20,18 +20,26 @@ class OnOffHbbaFilterState(_HbbaFilterState):
     def __init__(self, state_service_name):
         self._state_service = rospy.Service(state_service_name, SetOnOffFilterState, self._state_service_callback)
         self._is_filtering_all_messages = True
-        self._user_callback = None
+        self._on_changing_callback = None
+        self._on_changed_callback = None
 
     def _state_service_callback(self, request):
         previous_is_filtering_all_messages = self._is_filtering_all_messages
+        if self._on_changing_callback is not None:
+            self._on_changing_callback(previous_is_filtering_all_messages, request.is_filtering_all_messages)
+
         self._is_filtering_all_messages = request.is_filtering_all_messages
-        if self._user_callback is not None:
-            self._user_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages)
+
+        if self._on_changed_callback is not None:
+            self._on_changed_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages)
 
         return SetOnOffFilterStateResponse(ok=True)
 
+    def on_changing(self, callback):
+        self._on_changing_callback = callback
+
     def on_changed(self, callback):
-        self._user_callback = callback
+        self._on_changed_callback = callback
 
     def check(self):
         return not self._is_filtering_all_messages
@@ -47,7 +55,8 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
         self._is_filtering_all_messages = True
         self._rate = 1
         self._counter = 0
-        self._user_callback = None
+        self._on_changing_callback = None
+        self._on_changed_callback = None
 
     def _state_service_callback(self, request):
         if request.rate <= 0:
@@ -55,17 +64,24 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
 
         previous_is_filtering_all_messages = self._is_filtering_all_messages
         previous_rate = self._rate
+        if self._on_changing_callback is not None:
+            self._on_changing_callback(previous_is_filtering_all_messages, request.is_filtering_all_messages,
+                                       previous_rate, request.rate)
+
         self._is_filtering_all_messages = request.is_filtering_all_messages
         self._rate = request.rate
         self._counter = 0
-        if self._user_callback is not None:
-            self._user_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages, previous_rate,
-                                self._rate)
+        if self._on_changed_callback is not None:
+            self._on_changed_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages,
+                                      previous_rate, self._rate)
 
         return SetThrottlingFilterStateResponse(ok=True)
 
+    def on_changing(self, callback):
+        self._on_changing_callback = callback
+
     def on_changed(self, callback):
-        self._user_callback = callback
+        self._on_changed_callback = callback
 
     def check(self):
         if self._is_filtering_all_messages:
