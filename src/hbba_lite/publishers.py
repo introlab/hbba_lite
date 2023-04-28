@@ -19,6 +19,15 @@ class _HbbaPublisher:
     def is_filtering_all_messages(self):
         return self._filter_state._is_filtering_all_messages
 
+    def on_filter_state_changing(self, callback):
+        def publish_forced(msg):
+            self._publisher.publish(msg)
+
+        def filter_callback(*args):
+            callback(publish_forced, *args)
+
+        self._filter_state.on_changing(filter_callback)
+
     def on_filter_state_changed(self, callback):
         self._filter_state.on_changed(callback)
 
