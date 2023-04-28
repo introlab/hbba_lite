@@ -66,7 +66,7 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
         previous_rate = self._rate
         if self._on_changing_callback is not None:
             self._on_changing_callback(previous_is_filtering_all_messages, request.is_filtering_all_messages,
-                                      previous_rate, request.rate)
+                                       previous_rate, request.rate)
 
         self._is_filtering_all_messages = request.is_filtering_all_messages
         self._rate = request.rate
