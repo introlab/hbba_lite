@@ -270,13 +270,13 @@ inline StrategyType Strategy<T>::strategyType()
 }
 
 template<class T>
-void Strategy<T>::onEnabling(const Desire& desire)
+inline void Strategy<T>::onEnabling(const Desire& desire)
 {
     onEnabling(dynamic_cast<const T&>(desire));
 }
 
 template<class T>
-void Strategy<T>::onEnabling(const T& desire)
+inline void Strategy<T>::onEnabling(const T& desire)
 {
     BaseStrategy::onEnabling(desire);
 }
