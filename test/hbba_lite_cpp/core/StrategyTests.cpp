@@ -9,7 +9,7 @@
 using namespace std;
 
 
-class StrategyTestee : public Strategy<DesireC>
+class StrategyTestee : public Strategy<DesireD>
 {
 public:
     int onEnablingCount;
@@ -28,9 +28,9 @@ public:
     ~StrategyTestee() override = default;
 
 protected:
-    void onEnabling(const std::unique_ptr<Desire>& desire) override
+    void onEnabling(const DesireD& desire) override
     {
-        Strategy::onEnabling(desire);
+        Strategy<DesireD>::onEnabling(desire);
         onEnablingCount++;
     }
 
@@ -141,7 +141,7 @@ TEST(StrategyTests, getters_shouldReturnTheRightValues)
     EXPECT_EQ(testee.utility(), 1);
     EXPECT_EQ(testee.resourcesByName(), EXPECTED_RESOURCES);
     EXPECT_EQ(testee.filterConfigurationsByName(), EXPECTED_FILTER_CONFIGURATIONS);
-    EXPECT_EQ(testee.desireType(), DesireType::get<DesireC>());
+    EXPECT_EQ(testee.desireType(), DesireType::get<DesireD>());
 }
 
 TEST(StrategyTests, enableDisable_shouldChangeOnceTheState)
@@ -160,14 +160,14 @@ TEST(StrategyTests, enableDisable_shouldChangeOnceTheState)
     EXPECT_FALSE(testee.enabled());
     EXPECT_EQ(filterPool->enabledFilters.size(), 0);
 
-    testee.enable(desire);
+    testee.enable(*desire);
     EXPECT_EQ(testee.onEnablingCount, 1);
     EXPECT_EQ(testee.onDisablingCount, 0);
     EXPECT_TRUE(testee.enabled());
     EXPECT_EQ(filterPool->enabledFilters["c"], FilterConfiguration::throttling(1));
     EXPECT_EQ(filterPool->enabledFilters["d"], FilterConfiguration::throttling(2));
 
-    testee.enable(desire);
+    testee.enable(*desire);
     EXPECT_EQ(testee.onEnablingCount, 1);
     EXPECT_EQ(testee.onDisablingCount, 0);
     EXPECT_TRUE(testee.enabled());
