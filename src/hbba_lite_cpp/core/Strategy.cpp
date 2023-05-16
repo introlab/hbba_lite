@@ -97,7 +97,7 @@ BaseStrategy::BaseStrategy(
     }
 }
 
-void BaseStrategy::onEnabling(const std::unique_ptr<Desire>& desire)
+void BaseStrategy::onEnabling(const Desire& desire)
 {
     for (auto& pair : m_filterConfigurationsByName)
     {

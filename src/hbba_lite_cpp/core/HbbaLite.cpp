@@ -137,7 +137,7 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
     for (const auto& s : strategiesToEnable)
     {
         auto& strategy = m_strategiesByDesireType[s.second->type()][s.first];
-        strategy->enable(s.second);
+        strategy->enable(*s.second);
         m_strategyStateLogger->log(strategy->desireType(), strategy->strategyType(), true);
     }
 

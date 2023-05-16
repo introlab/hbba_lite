@@ -146,6 +146,8 @@ class BaseStrategy
     uint16_t m_utility;
     std::unordered_map<std::string, uint16_t> m_resourcesByName;
     std::unordered_map<std::string, FilterConfiguration> m_filterConfigurationsByName;
+
+protected:
     std::shared_ptr<FilterPool> m_filterPool;
 
 public:
@@ -162,7 +164,7 @@ public:
     uint16_t utility() const;
     uint64_t desireId() const;
 
-    void enable(const std::unique_ptr<Desire>& desire);
+    void enable(const Desire& desire);
     void disable();
     bool enabled() const;
 
@@ -173,7 +175,7 @@ public:
     virtual StrategyType strategyType() = 0;
 
 protected:
-    virtual void onEnabling(const std::unique_ptr<Desire>& desire);
+    virtual void onEnabling(const Desire& desire);
     virtual void onDisabling();
 };
 
@@ -187,12 +189,12 @@ inline uint64_t BaseStrategy::desireId() const
     return m_desireId;
 }
 
-inline void BaseStrategy::enable(const std::unique_ptr<Desire>& desire)
+inline void BaseStrategy::enable(const Desire& desire)
 {
     if (!m_enabled)
     {
         m_enabled = true;
-        m_desireId = desire->id();
+        m_desireId = desire.id();
         onEnabling(desire);
     }
 }
@@ -239,6 +241,10 @@ public:
 
     DesireType desireType() override;
     StrategyType strategyType() override;
+
+protected:
+    void onEnabling(const Desire& desire) final;
+    virtual void onEnabling(const T& desire);
 };
 
 template<class T>
@@ -261,6 +267,18 @@ template<class T>
 inline StrategyType Strategy<T>::strategyType()
 {
     return StrategyType::get<Strategy<T>>();
+}
+
+template<class T>
+inline void Strategy<T>::onEnabling(const Desire& desire)
+{
+    onEnabling(dynamic_cast<const T&>(desire));
+}
+
+template<class T>
+inline void Strategy<T>::onEnabling(const T& desire)
+{
+    BaseStrategy::onEnabling(desire);
 }
 
 #endif
