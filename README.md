@@ -157,7 +157,7 @@ This node applies priority arbitration to topics.
 - `topics`: The topic descriptions containing the topic name (string), priority (int, lower means higher priority) and timeout_s value (double).
 - `latch` (bool): Indicates if the output topic is latched.
 
-#### Subscribed Topics
+#### Published Topics
 
 - `out` (Any): The output topic.
 
@@ -165,7 +165,7 @@ This node applies priority arbitration to topics.
 
 This node applies an on/off filter on a topic.
 
-#### Subscribed Topics
+#### Topics
 
 - `in` (Any): The input topic.
 - `out` (Any): The filtered topic.
@@ -178,7 +178,7 @@ This node applies an on/off filter on a topic.
 
 This node applies a throttling filter on a topic.
 
-#### Subscribed Topics
+#### Topics
 
 - `in` (Any): The input topic.
 - `out` (Any): The filtered topic.
