@@ -19,7 +19,7 @@ jobs:
         with:
           path: catkin_ws/src/hbba_lite
 
-      - uses: ros-tooling/setup-ros@v0.2
+      - uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: noetic
 

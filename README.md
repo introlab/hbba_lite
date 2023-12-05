@@ -148,6 +148,19 @@ if __name__ == '__main__':
 
 ## Nodes
 
+### `arbitration_node`
+
+This node applies priority arbitration to topics.
+
+#### Parameters
+
+- `topics`: The topic descriptions containing the topic name (string), priority (int, lower means higher priority) and timeout_s value (double).
+- `latch` (bool): Indicates if the output topic is latched.
+
+#### Subscribed Topics
+
+- `out` (Any): The output topic.
+
 ### `on_off_hbba_filter_node`
 
 This node applies an on/off filter on a topic.

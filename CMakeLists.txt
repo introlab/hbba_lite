@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0.2)
 project(hbba_lite)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -148,6 +149,7 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+add_executable(arbitration_node src/arbitration_node.cpp)
 add_executable(on_off_hbba_filter_node src/on_off_hbba_filter_node.cpp)
 add_executable(throttling_hbba_filter_node src/throttling_hbba_filter_node.cpp)
 
@@ -181,6 +183,10 @@ target_link_libraries(${PROJECT_NAME}
         gecodesupport
         )
 
+target_link_libraries(arbitration_node
+        ${catkin_LIBRARIES}
+        ${PROJECT_NAME}
+        )
 target_link_libraries(on_off_hbba_filter_node
         ${catkin_LIBRARIES}
         ${PROJECT_NAME}
