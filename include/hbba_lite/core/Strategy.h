@@ -125,6 +125,7 @@ protected:
 
 public:
     FilterPool() = default;
+    virtual ~FilterPool() = default;
 
     DECLARE_NOT_COPYABLE(FilterPool);
     DECLARE_NOT_MOVABLE(FilterPool);
@@ -136,6 +137,10 @@ public:
 protected:
     virtual void applyEnabling(const std::string& name, const FilterConfiguration& configuration) = 0;
     virtual void applyDisabling(const std::string& name) = 0;
+
+    // Useful for decorators
+    void callApplyEnabling(FilterPool& filterPool, const std::string& name, const FilterConfiguration& configuration);
+    void callApplyDisabling(FilterPool& filterPool, const std::string& name);
 };
 
 class BaseStrategy

@@ -16,6 +16,11 @@ class RosFilterPool : public FilterPool
 
 public:
     RosFilterPool(ros::NodeHandle& nodeHandle, bool waitForService);
+    ~RosFilterPool() override = default;
+
+    DECLARE_NOT_COPYABLE(RosFilterPool);
+    DECLARE_NOT_MOVABLE(RosFilterPool);
+
     void add(const std::string& name, FilterType type) override;
 
 protected:
@@ -49,6 +54,24 @@ void RosFilterPool::call(const std::string& name, ServiceType& srv)
         ROS_ERROR("The service call has failed (%s)", name.c_str());
     }
 }
+
+class RosLogFilterPoolDecorator : public FilterPool
+{
+    std::unique_ptr<FilterPool> m_filterPool;
+
+public:
+    RosLogFilterPoolDecorator(std::unique_ptr<FilterPool> filterPool);
+    ~RosLogFilterPoolDecorator() override = default;
+
+    DECLARE_NOT_COPYABLE(RosLogFilterPoolDecorator);
+    DECLARE_NOT_MOVABLE(RosLogFilterPoolDecorator);
+
+    void add(const std::string& name, FilterType type) override;
+
+protected:
+    void applyEnabling(const std::string& name, const FilterConfiguration& configuration) override;
+    void applyDisabling(const std::string& name) override;
+};
 
 
 #endif

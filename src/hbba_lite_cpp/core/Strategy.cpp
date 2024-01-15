@@ -79,6 +79,19 @@ void FilterPool::disable(const string& name)
     }
 }
 
+void FilterPool::callApplyEnabling(
+    FilterPool& filterPool,
+    const std::string& name,
+    const FilterConfiguration& configuration)
+{
+    filterPool.applyEnabling(name, configuration);
+}
+
+void FilterPool::callApplyDisabling(FilterPool& filterPool, const std::string& name)
+{
+    filterPool.applyDisabling(name);
+}
+
 BaseStrategy::BaseStrategy(
     uint16_t utility,
     unordered_map<string, uint16_t> resourcesByName,

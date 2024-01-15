@@ -83,3 +83,37 @@ void RosFilterPool::applyDisabling(const string& name)
             throw HbbaLiteException("Not supported filter type");
     }
 }
+
+RosLogFilterPoolDecorator::RosLogFilterPoolDecorator(unique_ptr<FilterPool> filterPool) : m_filterPool(move(filterPool))
+{
+}
+
+void RosLogFilterPoolDecorator::add(const std::string& name, FilterType type)
+{
+    m_filterPool->add(name, type);
+}
+
+void RosLogFilterPoolDecorator::applyEnabling(const std::string& name, const FilterConfiguration& configuration)
+{
+    callApplyEnabling(*m_filterPool, name, configuration);
+
+    switch (configuration.type())
+    {
+        case FilterType::ON_OFF:
+            ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> enabled");
+            break;
+
+        case FilterType::THROTTLING:
+            ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> enabled (" << configuration.rate() << ")");
+            break;
+
+        default:
+            throw HbbaLiteException("Not supported filter type");
+    }
+}
+
+void RosLogFilterPoolDecorator::applyDisabling(const std::string& name)
+{
+    callApplyDisabling(*m_filterPool, name);
+    ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> disabled");
+}

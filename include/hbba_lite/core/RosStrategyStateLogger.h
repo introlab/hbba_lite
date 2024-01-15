@@ -5,16 +5,30 @@
 
 #include <ros/ros.h>
 
-class RosStrategyStateLogger : public StrategyStateLogger
+class RosLogStrategyStateLogger : public StrategyStateLogger
+{
+public:
+    RosLogStrategyStateLogger() = default;
+    ~RosLogStrategyStateLogger() override = default;
+
+    DECLARE_NOT_COPYABLE(RosLogStrategyStateLogger);
+    DECLARE_NOT_MOVABLE(RosLogStrategyStateLogger);
+
+    void log(DesireType desireType, StrategyType strategyType, bool enabled) override;
+};
+
+
+class RosTopicStrategyStateLogger : public StrategyStateLogger
 {
     ros::NodeHandle& m_nodeHandle;
     ros::Publisher m_strategyStatePub;
 
 public:
-    RosStrategyStateLogger(ros::NodeHandle& nodeHandle);
+    RosTopicStrategyStateLogger(ros::NodeHandle& nodeHandle);
+    ~RosTopicStrategyStateLogger() override = default;
 
-    DECLARE_NOT_COPYABLE(RosStrategyStateLogger);
-    DECLARE_NOT_MOVABLE(RosStrategyStateLogger);
+    DECLARE_NOT_COPYABLE(RosTopicStrategyStateLogger);
+    DECLARE_NOT_MOVABLE(RosTopicStrategyStateLogger);
 
     void log(DesireType desireType, StrategyType strategyType, bool enabled) override;
 };
