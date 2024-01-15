@@ -8,9 +8,7 @@ void RosLogStrategyStateLogger::log(DesireType desireType, StrategyType strategy
 {
     ROS_INFO_STREAM(
         "HBBA strategy state changed: "
-                << "( " << desireType.name() << ", " << strategyType.name() << ") -> " << enabled ?
-            "enabled" :
-            "disabled");
+        << "( " << desireType.name() << ", " << strategyType.name() << ") -> " << (enabled ? "enabled" : "disabled"));
 }
 
 
