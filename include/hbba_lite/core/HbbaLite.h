@@ -55,7 +55,7 @@ public:
         std::vector<std::unique_ptr<BaseStrategy>> strategies,
         std::unordered_map<std::string, uint16_t> resourcesByNames,
         std::unique_ptr<Solver> solver,
-        std::unique_ptr<StrategyStateLogger> strategyStateLogger = std::make_unique<DummyStrategyStateLogger>());
+        std::unique_ptr<StrategyStateLogger> strategyStateLogger = std::make_unique<NoOpStrategyStateLogger>());
     ~HbbaLite();
 
     DECLARE_NOT_COPYABLE(HbbaLite);

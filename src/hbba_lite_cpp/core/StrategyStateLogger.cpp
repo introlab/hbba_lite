@@ -2,6 +2,6 @@
 
 StrategyStateLogger::StrategyStateLogger() {}
 
-DummyStrategyStateLogger::DummyStrategyStateLogger() {}
+NoOpStrategyStateLogger::NoOpStrategyStateLogger() {}
 
-void DummyStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled) {}
+void NoOpStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled) {}

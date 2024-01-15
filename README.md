@@ -55,13 +55,13 @@ Also, it may have parameters used by the strategy.
 A strategy represents a way to fulfill a desire. The strategy will accomplish the desire once the strategy is activated.
 At least one strategy is required for each desire type.
 If there are many strategies for a desire type, the strategy with the highest utility is prioritized.
-A strategy has a list of filters to enable and a list resources required to be enabled.
+A strategy has a list of filters to enable and a list of resources required to be enabled.
 The resources can be used to prevent conflicts of actuators between strategies.
 If resources are used to manage the processing time in percent, the strategy resources can contain the estimated processing time in percent.
 So, HBBA will manage the processing time of the robot.
 
 #### Desire Set
-The desire set contains the current desires to fulfill. An observer pattern is implemented in the desire to get notified of changes.
+The desire set contains the current desires to fulfill. An observer pattern is implemented in the desire set to get notified of changes.
 
 #### Motivations
 The motivations modify the content of the desire set to make the robot do something useful.
@@ -106,7 +106,7 @@ class TalkDesire : public Desire
 
 public:
     // Add the desire parameters as arguments of the constructor.
-    TalkDesire::TalkDesire(string text, uint16_t intensity) : Desire(intensity), m_text(move(text)) {}
+    explicit TalkDesire::TalkDesire(string text, uint16_t intensity = 1) : Desire(intensity), m_text(move(text)) {}
     ~TalkDesire() override = default;
 
     // The following macro overrides the required methods to declare a Desire.
@@ -171,8 +171,6 @@ protected:
     // Override the method to publish a message when the strategy is enabled.
     void onEnabling(const TalkDesire& desire) override
     {
-        Strategy<TalkDesire>::onEnabling(desire); // Enable the filters declared in the constructor.
-
         // Publish the text to be said.
         talk::Text msg;
         msg.text = desire.text();

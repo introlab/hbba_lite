@@ -17,14 +17,14 @@ public:
     virtual void log(DesireType desireType, StrategyType strategyType, bool enabled) = 0;
 };
 
-class DummyStrategyStateLogger : public StrategyStateLogger
+class NoOpStrategyStateLogger : public StrategyStateLogger
 {
 public:
-    DummyStrategyStateLogger();
-    ~DummyStrategyStateLogger() override = default;
+    NoOpStrategyStateLogger();
+    ~NoOpStrategyStateLogger() override = default;
 
-    DECLARE_NOT_COPYABLE(DummyStrategyStateLogger);
-    DECLARE_NOT_MOVABLE(DummyStrategyStateLogger);
+    DECLARE_NOT_COPYABLE(NoOpStrategyStateLogger);
+    DECLARE_NOT_MOVABLE(NoOpStrategyStateLogger);
 
     void log(DesireType desireType, StrategyType strategyType, bool enabled) override;
 };
