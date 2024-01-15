@@ -90,6 +90,8 @@ RosLogFilterPoolDecorator::RosLogFilterPoolDecorator(unique_ptr<FilterPool> filt
 
 void RosLogFilterPoolDecorator::add(const std::string& name, FilterType type)
 {
+    lock_guard<recursive_mutex> lock(m_mutex);
+    FilterPool::add(name, type);
     m_filterPool->add(name, type);
 }
 

@@ -313,7 +313,7 @@ HbbaLite hbba(desireSet,
 // Add desires to the set.
 ```
 
-#### Strategy State Logger
+#### Strategy State Logger Usage
 To log the strategy state changed of the strategy, you can use the `RosLogStrategyStateLogger` class.
 
 ```cpp
@@ -338,8 +338,8 @@ HbbaLite hbba(desireSet,
 // Add desires to the set.
 ```
 
-#### Filter State Logger
-To log the filter state changed of the strategy, you can use the `RosLogStrategyStateLogger` class.
+#### Filter State Logger Usage
+To log the filter state changed of the strategy, you can use the `RosLogFilterPoolDecorator` class.
 
 ```cpp
 constexpr bool WAIT_FOR_SERVICE = true;
@@ -348,7 +348,7 @@ auto desireSet = make_shared<DesireSet>(); // Create the desire set.
 // Create the filter pool useful to change the filter states.
 // If WAIT_FOR_SERVICE is true, the pool will wait until the service become available.
 auto rosFilterPool = make_unique<RosFilterPool>(nodeHandle, WAIT_FOR_SERVICE);
-auto filterPoos = make_shared<RosLogFilterPoolDecorator>(move(rosFilterPool));
+auto filterPool = make_shared<RosLogFilterPoolDecorator>(move(rosFilterPool));
 
 vector<unique_ptr<BaseStrategy>> strategies;
 // Add the strategies related to the application into the vector.

@@ -116,9 +116,10 @@ inline bool operator!=(const FilterConfiguration& a, const FilterConfiguration& 
 
 class FilterPool
 {
+    std::unordered_map<std::string, int> m_countsByName;
+
 protected:
     std::unordered_map<std::string, FilterType> m_typesByName;
-    std::unordered_map<std::string, int> m_countsByName;
     std::unordered_map<std::string, FilterConfiguration> m_lastFilterConfigurationByName;
 
     std::recursive_mutex m_mutex;
