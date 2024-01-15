@@ -116,15 +116,17 @@ inline bool operator!=(const FilterConfiguration& a, const FilterConfiguration& 
 
 class FilterPool
 {
+    std::unordered_map<std::string, int> m_countsByName;
+
 protected:
     std::unordered_map<std::string, FilterType> m_typesByName;
-    std::unordered_map<std::string, int> m_countsByName;
     std::unordered_map<std::string, FilterConfiguration> m_lastFilterConfigurationByName;
 
     std::recursive_mutex m_mutex;
 
 public:
     FilterPool() = default;
+    virtual ~FilterPool() = default;
 
     DECLARE_NOT_COPYABLE(FilterPool);
     DECLARE_NOT_MOVABLE(FilterPool);
@@ -136,6 +138,10 @@ public:
 protected:
     virtual void applyEnabling(const std::string& name, const FilterConfiguration& configuration) = 0;
     virtual void applyDisabling(const std::string& name) = 0;
+
+    // Useful for decorators
+    void callApplyEnabling(FilterPool& filterPool, const std::string& name, const FilterConfiguration& configuration);
+    void callApplyDisabling(FilterPool& filterPool, const std::string& name);
 };
 
 class BaseStrategy
@@ -272,13 +278,13 @@ inline StrategyType Strategy<T>::strategyType()
 template<class T>
 inline void Strategy<T>::onEnabling(const Desire& desire)
 {
+    BaseStrategy::onEnabling(desire);
     onEnabling(dynamic_cast<const T&>(desire));
 }
 
 template<class T>
 inline void Strategy<T>::onEnabling(const T& desire)
 {
-    BaseStrategy::onEnabling(desire);
 }
 
 #endif
