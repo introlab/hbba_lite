@@ -1,6 +1,8 @@
 #include <hbba_lite/core/HbbaLite.h>
 #include <hbba_lite/utils/HbbaLiteException.h>
 
+#include <ctime>
+
 using namespace std;
 
 HbbaLite::HbbaLite(
@@ -13,9 +15,13 @@ HbbaLite::HbbaLite(
       m_resourcesByNames(move(resourcesByNames)),
       m_solver(move(solver)),
       m_strategyStateLogger(move(strategyStateLogger)),
-      m_pendingDesiresSemaphore(false),
       m_stopped(false)
 {
+    if (sem_init(&m_pendingDesiresSemaphore, 0, 0) == -1)
+    {
+        throw HbbaLiteException("Semaphore init failed");
+    }
+
     for (auto& strategy : strategies)
     {
         checkStrategyResources(strategy->desireType(), strategy->resourcesByName());
@@ -32,19 +38,21 @@ HbbaLite::~HbbaLite()
 
     m_stopped.store(true);
     m_thread->join();
+
+    sem_destroy(&m_pendingDesiresSemaphore);
 }
 
 void HbbaLite::onDesireSetChanged(const vector<unique_ptr<Desire>>& enabledDesires)
 {
     lock_guard<mutex> lock(m_pendingDesiresMutex);
-    m_pendingDesires.clear();
+    m_pendingDesires = vector<unique_ptr<Desire>>();
 
     for (auto& enabledDesire : enabledDesires)
     {
-        m_pendingDesires.emplace_back(enabledDesire->clone());
+        m_pendingDesires->emplace_back(enabledDesire->clone());
     }
 
-    m_pendingDesiresSemaphore.release();
+    sem_post(&m_pendingDesiresSemaphore);
 }
 
 void HbbaLite::checkStrategyResources(DesireType desireType, const unordered_map<string, uint16_t>& resourcesByNames)
@@ -69,18 +77,23 @@ void HbbaLite::checkStrategyResources(DesireType desireType, const unordered_map
 
 void HbbaLite::run()
 {
-    constexpr chrono::milliseconds SEMAPHORE_WAIT_DURATION(10);
+    struct timespec waitDuration;
+    waitDuration.tv_sec = 0;
+    waitDuration.tv_nsec = 10'000'000;
 
     while (!m_stopped.load())
     {
-        if (m_pendingDesiresSemaphore.tryAcquireFor(SEMAPHORE_WAIT_DURATION))
+        if (sem_timedwait(&m_pendingDesiresSemaphore, &waitDuration) == 0)
         {
-            vector<unique_ptr<Desire>> desires;
+            optional<vector<unique_ptr<Desire>>> desires;
             {
                 lock_guard<mutex> lock(m_pendingDesiresMutex);
                 swap(m_pendingDesires, desires);
             }
-            updateStrategies(move(desires));
+            if (desires.has_value())
+            {
+                updateStrategies(move(*desires));
+            }
         }
     }
 }

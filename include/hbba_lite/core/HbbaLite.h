@@ -2,12 +2,13 @@
 #define HBBA_LITE_CORE_HBBA_LITE_H
 
 #include <hbba_lite/utils/ClassMacros.h>
-#include <hbba_lite/utils/BinarySemaphore.h>
 
 #include <hbba_lite/core/DesireSet.h>
 #include <hbba_lite/core/Strategy.h>
 #include <hbba_lite/core/Solver.h>
 #include <hbba_lite/core/StrategyStateLogger.h>
+
+#include <semaphore.h>
 
 #include <atomic>
 #include <unordered_map>
@@ -16,7 +17,9 @@
 #include <typeindex>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <set>
+#include <optional>
 
 template<>
 struct std::hash<std::pair<DesireType, size_t>>
@@ -38,8 +41,8 @@ class HbbaLite : public DesireSetObserver
     std::unique_ptr<StrategyStateLogger> m_strategyStateLogger;
 
     std::mutex m_pendingDesiresMutex;
-    BinarySemaphore m_pendingDesiresSemaphore;
-    std::vector<std::unique_ptr<Desire>> m_pendingDesires;
+    sem_t m_pendingDesiresSemaphore; // TODO remplace with C++20 semaphore
+    std::optional<std::vector<std::unique_ptr<Desire>>> m_pendingDesires;
 
     std::atomic_bool m_stopped;
     std::unique_ptr<std::thread> m_thread;

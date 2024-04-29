@@ -127,7 +127,6 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
         src/hbba_lite_cpp/filters/FilterState.cpp
-        src/hbba_lite_cpp/utils/BinarySemaphore.cpp
         src/hbba_lite_cpp/utils/HbbaLiteException.cpp
         src/hbba_lite_cpp/core/Desire.cpp
         src/hbba_lite_cpp/core/DesireSet.cpp
@@ -261,7 +260,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 ## Add gtest based cpp test target and link libraries
 catkin_add_gtest(${PROJECT_NAME}-test
-        test/hbba_lite_cpp/utils/BinarySemaphoreTests.cpp
         test/hbba_lite_cpp/core/DesireTests.cpp
         test/hbba_lite_cpp/core/DesireSetTests.cpp
         test/hbba_lite_cpp/core/StrategyTests.cpp
