@@ -10,6 +10,7 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include <optional>
 
 class BaseStrategy;
 
@@ -147,7 +148,7 @@ protected:
 class BaseStrategy
 {
     bool m_enabled;
-    uint64_t m_desireId;
+    std::optional<uint64_t> m_desireId;
 
     uint16_t m_utility;
     std::unordered_map<std::string, uint16_t> m_resourcesByName;
@@ -168,7 +169,7 @@ public:
     DECLARE_NOT_MOVABLE(BaseStrategy);
 
     uint16_t utility() const;
-    uint64_t desireId() const;
+    std::optional<uint64_t> desireId() const;
 
     void enable(const Desire& desire);
     void disable();
@@ -190,7 +191,7 @@ inline uint16_t BaseStrategy::utility() const
     return m_utility;
 }
 
-inline uint64_t BaseStrategy::desireId() const
+inline std::optional<uint64_t> BaseStrategy::desireId() const
 {
     return m_desireId;
 }
@@ -210,7 +211,7 @@ inline void BaseStrategy::disable()
     if (m_enabled)
     {
         m_enabled = false;
-        m_desireId = std::numeric_limits<uint64_t>::max();
+        m_desireId = std::nullopt;
         onDisabling();
     }
 }
