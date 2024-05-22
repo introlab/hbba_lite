@@ -14,7 +14,7 @@ The main differences are :
   solver.
 
 ## Integrated Code
-The code in `src/rosbag2_generic_topic` and `include/rosbag2_generic_topic` folders are from [rosbag2](https://github.com/ros2/rosbag2)
+The code in `src/rosbag2_generic_topic` and `include/rosbag2_generic_topic` folders are from [rosbag2](https://github.com/ros2/rosbag2) because the generic subscriber and publisher classes are not available in Foxy.
 
 ## Dependencies
 
