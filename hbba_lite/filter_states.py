@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 
-import rospy
-
-from hbba_lite.srv import SetOnOffFilterState, SetOnOffFilterStateResponse, SetThrottlingFilterState, \
-    SetThrottlingFilterStateResponse
+from hbba_lite.srv import SetOnOffFilterState, SetThrottlingFilterState
 
 
 class _HbbaFilterState(ABC):
@@ -17,13 +14,13 @@ class _HbbaFilterState(ABC):
 
 
 class OnOffHbbaFilterState(_HbbaFilterState):
-    def __init__(self, state_service_name):
-        self._state_service = rospy.Service(state_service_name, SetOnOffFilterState, self._state_service_callback)
+    def __init__(self, node, state_service_name):
+        self._state_service = node.create_service(SetOnOffFilterState, state_service_name, self._state_service_callback)
         self._is_filtering_all_messages = True
         self._on_changing_callback = None
         self._on_changed_callback = None
 
-    def _state_service_callback(self, request):
+    def _state_service_callback(self, request, response):
         previous_is_filtering_all_messages = self._is_filtering_all_messages
         if self._on_changing_callback is not None:
             self._on_changing_callback(previous_is_filtering_all_messages, request.is_filtering_all_messages)
@@ -33,7 +30,8 @@ class OnOffHbbaFilterState(_HbbaFilterState):
         if self._on_changed_callback is not None:
             self._on_changed_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages)
 
-        return SetOnOffFilterStateResponse(ok=True)
+        response.ok = True
+        return response
 
     def on_changing(self, callback):
         self._on_changing_callback = callback
@@ -50,17 +48,18 @@ class OnOffHbbaFilterState(_HbbaFilterState):
 
 
 class ThrottlingHbbaFilterState(_HbbaFilterState):
-    def __init__(self, state_service_name):
-        self._state_service = rospy.Service(state_service_name, SetThrottlingFilterState, self._state_service_callback)
+    def __init__(self, node, state_service_name):
+        self._state_service = node.create_service(SetThrottlingFilterState, state_service_name, self._state_service_callback)
         self._is_filtering_all_messages = True
         self._rate = 1
         self._counter = 0
         self._on_changing_callback = None
         self._on_changed_callback = None
 
-    def _state_service_callback(self, request):
+    def _state_service_callback(self, request, response):
         if request.rate <= 0:
-            return SetThrottlingFilterStateResponse(ok=False)
+            response.ok = False
+            return response
 
         previous_is_filtering_all_messages = self._is_filtering_all_messages
         previous_rate = self._rate
@@ -75,7 +74,8 @@ class ThrottlingHbbaFilterState(_HbbaFilterState):
             self._on_changed_callback(previous_is_filtering_all_messages, self._is_filtering_all_messages,
                                       previous_rate, self._rate)
 
-        return SetThrottlingFilterStateResponse(ok=True)
+        response.ok = True
+        return response
 
     def on_changing(self, callback):
         self._on_changing_callback = callback

@@ -1,17 +1,16 @@
-import rospy
 import message_filters
 
 from hbba_lite.filter_states import OnOffHbbaFilterState, ThrottlingHbbaFilterState
 
 
 class _HbbaSubscriber:
-    def __init__(self, topic_name, data_class, filter_state_class, callback, state_service_name, queue_size):
+    def __init__(self, node, data_class, topic_name, filter_state_class, callback, state_service_name, qos_profile):
         if state_service_name is None:
             state_service_name = topic_name + '/filter_state'
         self._callback = callback
 
-        self._filter_state = filter_state_class(state_service_name)
-        self._subscriber = rospy.Subscriber(topic_name, data_class, self._subscriber_callback, queue_size=queue_size)
+        self._filter_state = filter_state_class(node, state_service_name)
+        self._subscriber = node.create_subscription(data_class, topic_name, self._subscriber_callback, qos_profile)
 
     def _subscriber_callback(self, msg):
         if self._filter_state.check() and self._callback is not None:
@@ -24,28 +23,30 @@ class _HbbaSubscriber:
     def on_filter_state_changed(self, callback):
         self._filter_state.on_changed(callback)
 
-    def unregister(self):
-        self._subscriber.unregister()
+    def destroy(self):
+        self._subscriber.destroy()
 
 
 class OnOffHbbaSubscriber(_HbbaSubscriber):
-    def __init__(self, topic_name, data_class, callback=None, state_service_name=None, queue_size=None):
-        super(OnOffHbbaSubscriber, self).__init__(topic_name, data_class, OnOffHbbaFilterState,
-                                                  callback, state_service_name, queue_size)
+    def __init__(self, node, data_class, topic_name, callback, qos_profile, state_service_name=None):
+        super(OnOffHbbaSubscriber, self).__init__(node,
+                                                  data_class, topic_name, OnOffHbbaFilterState,
+                                                  callback, state_service_name, qos_profile)
 
 
 class ThrottlingHbbaSubscriber(_HbbaSubscriber):
-    def __init__(self, topic_name, data_class, callback=None, state_service_name=None, queue_size=None):
-        super(ThrottlingHbbaSubscriber, self).__init__(topic_name, data_class, ThrottlingHbbaFilterState,
-                                                       callback, state_service_name, queue_size)
+    def __init__(self, node, data_class, topic_name, callback, qos_profile, state_service_name=None):
+        super(ThrottlingHbbaSubscriber, self).__init__(node,
+                                                       data_class, topic_name, ThrottlingHbbaFilterState,
+                                                       callback, state_service_name, qos_profile)
 
 
 class _HbbaTimeSynchronizer:
-    def __init__(self, message_filter_subscribers, filter_state_class, callback, state_service_name,
+    def __init__(self, node, message_filter_subscribers, filter_state_class, callback, state_service_name,
                  queue_size):
         self._callback = callback
 
-        self._filter_state = filter_state_class(state_service_name)
+        self._filter_state = filter_state_class(node, state_service_name)
         self._ts = message_filters.TimeSynchronizer(message_filter_subscribers, queue_size=queue_size)
         self._ts.registerCallback(self._ts_callback)
 
@@ -62,23 +63,25 @@ class _HbbaTimeSynchronizer:
 
 
 class OnOffHbbaTimeSynchronizer(_HbbaTimeSynchronizer):
-    def __init__(self, message_filter_subscribers, queue_size, callback=None, state_service_name=None):
-        super(OnOffHbbaTimeSynchronizer, self).__init__(message_filter_subscribers, OnOffHbbaFilterState,
+    def __init__(self, node, message_filter_subscribers, queue_size, callback=None, state_service_name=None):
+        super(OnOffHbbaTimeSynchronizer, self).__init__(node,
+                                                        message_filter_subscribers, OnOffHbbaFilterState,
                                                         callback, state_service_name, queue_size)
 
 
 class ThrottlingHbbaTimeSynchronizer(_HbbaTimeSynchronizer):
-    def __init__(self, message_filter_subscribers, queue_size, callback=None, state_service_name=None):
-        super(ThrottlingHbbaTimeSynchronizer, self).__init__(message_filter_subscribers, ThrottlingHbbaFilterState,
+    def __init__(self, node, message_filter_subscribers, queue_size, callback=None, state_service_name=None):
+        super(ThrottlingHbbaTimeSynchronizer, self).__init__(node,
+                                                             message_filter_subscribers, ThrottlingHbbaFilterState,
                                                              callback, state_service_name, queue_size)
 
 
 class _HbbaApproximateTimeSynchronizer:
-    def __init__(self, message_filter_subscribers, filter_state_class, callback, state_service_name,
+    def __init__(self, node, message_filter_subscribers, filter_state_class, callback, state_service_name,
                  queue_size, slop, allow_headerless):
         self._callback = callback
 
-        self._filter_state = filter_state_class(state_service_name)
+        self._filter_state = filter_state_class(node, state_service_name)
         self._ts = message_filters.ApproximateTimeSynchronizer(message_filter_subscribers, queue_size, slop,
                                                                allow_headerless=allow_headerless)
         self._ts.registerCallback(self._ts_callback)
@@ -96,18 +99,20 @@ class _HbbaApproximateTimeSynchronizer:
 
 
 class OnOffHbbaApproximateTimeSynchronizer(_HbbaApproximateTimeSynchronizer):
-    def __init__(self, message_filter_subscribers, queue_size, slop, callback=None, state_service_name=None,
+    def __init__(self, node, message_filter_subscribers, queue_size, slop, callback=None, state_service_name=None,
                  allow_headerless=False):
-        super(OnOffHbbaApproximateTimeSynchronizer, self).__init__(message_filter_subscribers,
+        super(OnOffHbbaApproximateTimeSynchronizer, self).__init__(node,
+                                                                   message_filter_subscribers,
                                                                    OnOffHbbaFilterState,
                                                                    callback, state_service_name,
                                                                    queue_size, slop, allow_headerless)
 
 
 class ThrottlingHbbaApproximateTimeSynchronizer(_HbbaApproximateTimeSynchronizer):
-    def __init__(self, message_filter_subscribers, queue_size, slop, callback=None, state_service_name=None,
+    def __init__(self, node, message_filter_subscribers, queue_size, slop, callback=None, state_service_name=None,
                  allow_headerless=False):
-        super(ThrottlingHbbaApproximateTimeSynchronizer, self).__init__(message_filter_subscribers,
+        super(ThrottlingHbbaApproximateTimeSynchronizer, self).__init__(node,
+                                                                        message_filter_subscribers,
                                                                         ThrottlingHbbaFilterState,
                                                                         callback, state_service_name,
                                                                         queue_size, slop, allow_headerless)

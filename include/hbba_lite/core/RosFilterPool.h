@@ -3,19 +3,19 @@
 
 #include <hbba_lite/core/Strategy.h>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <unordered_map>
 
 class RosFilterPool : public FilterPool
 {
-    ros::NodeHandle& m_nodeHandle;
+    std::shared_ptr<rclcpp::Node> m_node;
     bool m_waitForService;
 
-    std::unordered_map<std::string, ros::ServiceClient> m_serviceClientsByName;
+    std::unordered_map<std::string, rclcpp::ClientBase::SharedPtr> m_serviceClientsByName;
 
 public:
-    RosFilterPool(ros::NodeHandle& nodeHandle, bool waitForService);
+    RosFilterPool(std::shared_ptr<rclcpp::Node> node, bool waitForService);
     ~RosFilterPool() override = default;
 
     DECLARE_NOT_COPYABLE(RosFilterPool);
@@ -29,38 +29,40 @@ protected:
 
 private:
     template<class ServiceType>
-    void call(const std::string& name, ServiceType& request);
+    void call(const std::string& name, std::shared_ptr<typename ServiceType::Request> request);
 };
 
 template<class ServiceType>
-void RosFilterPool::call(const std::string& name, ServiceType& srv)
+void RosFilterPool::call(const std::string& name, std::shared_ptr<typename ServiceType::Request> request)
 {
-    ros::ServiceClient& service = m_serviceClientsByName[name];
-    if (m_waitForService)
+    auto client = std::dynamic_pointer_cast<rclcpp::Client<ServiceType>>(m_serviceClientsByName[name]);
+    if (client == nullptr)
     {
-        ros::service::waitForService(name);
+        RCLCPP_ERROR(m_node->get_logger(), "The service type is not valid");
+        return;
     }
 
-    if (!service.isValid())
+    if (m_waitForService)
     {
-        service = m_nodeHandle.serviceClient<ServiceType>(name, true);
+        client->wait_for_service();
     }
-    if (!service.exists())
+
+    auto result = client->async_send_request(request);
+    auto futureReturnCode = rclcpp::spin_until_future_complete(m_node, result);
+
+    if (futureReturnCode != rclcpp::FutureReturnCode::SUCCESS || !result.get()->ok)
     {
-        ROS_ERROR("The service does not exist (%s)", name.c_str());
-    }
-    else if (!service.call(srv) || !srv.response.ok)
-    {
-        ROS_ERROR("The service call has failed (%s)", name.c_str());
+        RCLCPP_ERROR(m_node->get_logger(), "The service call has failed (%s)", name.c_str());
     }
 }
 
 class RosLogFilterPoolDecorator : public FilterPool
 {
+    std::shared_ptr<rclcpp::Node> m_node;
     std::unique_ptr<FilterPool> m_filterPool;
 
 public:
-    RosLogFilterPoolDecorator(std::unique_ptr<FilterPool> filterPool);
+    RosLogFilterPoolDecorator(std::shared_ptr<rclcpp::Node> node, std::unique_ptr<FilterPool> filterPool);
     ~RosLogFilterPoolDecorator() override = default;
 
     DECLARE_NOT_COPYABLE(RosLogFilterPoolDecorator);

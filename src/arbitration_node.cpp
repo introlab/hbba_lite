@@ -1,156 +1,154 @@
-#include <ros/ros.h>
-#include <topic_tools/shape_shifter.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rosbag2_generic_topic/rosbag2_node.hpp>
 
 #include <unordered_set>
 #include <optional>
 
 using namespace std;
 
+constexpr const char* NODE_NAME = "arbitration_node";
+
 struct Topic
 {
     string name;
     int priority;
-    ros::Duration timeout;
+    rclcpp::Duration timeout;
 };
 
-class ArbitrationNode
+class ArbitrationNode : public rosbag2_generic_topic::Rosbag2Node
 {
-    ros::NodeHandle& m_nodeHandle;
-    vector<ros::Subscriber> m_subscribers;
-    ros::Publisher m_publisher;
-    bool m_hasAdvertised;
+    rclcpp::TimerBase::SharedPtr m_initTimer;
+    vector<shared_ptr<rosbag2_generic_topic::GenericSubscription>> m_subscribers;
+    shared_ptr<rosbag2_generic_topic::GenericPublisher> m_publisher;
 
     vector<Topic> m_topics;
-    bool m_latch;
 
     optional<int> m_currentTopicIndex;
-    ros::Time m_lastMessageTime;
+    rclcpp::Time m_lastMessageTime;
 
 public:
-    ArbitrationNode(ros::NodeHandle& nodeHandle, vector<Topic> topics, bool latch)
-        : m_nodeHandle(nodeHandle),
-          m_hasAdvertised(false),
-          m_topics(move(topics)),
-          m_latch(latch),
-          m_lastMessageTime(ros::Time::now())
+    ArbitrationNode()
+        : rosbag2_generic_topic::Rosbag2Node(NODE_NAME),
+          m_lastMessageTime(get_clock()->now())
     {
-        for (size_t i = 0; i < m_topics.size(); i++)
+        m_topics = convertToTopics(
+            declare_parameter("topics", vector<string>{}),
+            declare_parameter("priorities", vector<int64_t>{}),
+            declare_parameter("timeout_s", vector<double>{}));
+        if (!hasUniquePriority(m_topics))
         {
-            m_subscribers.emplace_back(m_nodeHandle.subscribe<topic_tools::ShapeShifter>(
-                m_topics[i].name,
-                1,
-                [this, i](const ros::MessageEvent<topic_tools::ShapeShifter>& msgEvent) { callback(i, msgEvent); }));
+            throw std::runtime_error("The topic priorities must be unique.");
         }
+
+        m_initTimer = create_wall_timer(std::chrono::seconds(1), std::bind(&ArbitrationNode::initTimerCallback, this));
     }
 
-    void run() { ros::spin(); }
+    void run()
+    {
+        rclcpp::spin(shared_from_this());
+    }
 
 private:
-    void callback(size_t i, const ros::MessageEvent<topic_tools::ShapeShifter>& msgEvent)
+    vector<Topic> convertToTopics(const vector<string>& topics, const vector<int64_t>& priorities, const vector<double>& timeoutS)
     {
-        auto& msg = msgEvent.getConstMessage();
-        if (!m_hasAdvertised)
+        if (topics.size() != priorities.size() || topics.size() != timeoutS.size())
         {
-            advertise(msg);
+            throw std::runtime_error("The topics, priorities, timeout_s parameters must have the same size.");
         }
 
+        vector<Topic> convertedTopics;
+        for (size_t i = 0; i < topics.size(); i++)
+        {
+            auto expandedTopic = rclcpp::expand_topic_or_service_name(topics[i], get_name(), get_namespace(), false);
+            auto timeout = chrono::duration<double, std::ratio<1>>(timeoutS[i]);
+            convertedTopics.emplace_back(Topic{expandedTopic, static_cast<int>(priorities[i]), timeout});
+        }
+
+        return convertedTopics;
+    }
+
+    bool hasUniquePriority(const vector<Topic>& topics)
+    {
+        unordered_set<int> priorities;
+
+        for (auto& topic : topics)
+        {
+            if (priorities.count(topic.priority) > 0)
+            {
+                return false;
+            }
+
+            priorities.insert(topic.priority);
+        }
+
+        return true;
+    }
+
+    void initTimerCallback()
+    {
+        auto topicType = getTopicType();
+        if (topicType == nullopt)
+        {
+            return;
+        }
+
+        for (size_t i = 0; i < m_topics.size(); i++)
+        {
+            m_subscribers.emplace_back(create_generic_subscription(
+                m_topics[i].name,
+                *topicType,
+                1,
+                [this, i](shared_ptr<rclcpp::SerializedMessage> msg) { messageCallback(i, msg); }));
+        }
+        m_publisher = create_generic_publisher("out", *topicType, 10);
+
+        m_initTimer->cancel();
+    }
+
+    optional<string> getTopicType()
+    {
+        auto all_topics_and_types = get_topic_names_and_types();
+        string type;
+        for (auto t : m_topics)
+        {
+            auto it = all_topics_and_types.find(t.name);
+            if (it != all_topics_and_types.end() && !it->second.empty())
+            {
+                return it->second[0];
+            }
+        }
+
+        return nullopt;
+    }
+
+    void messageCallback(size_t i, shared_ptr<rclcpp::SerializedMessage> msg)
+    {
         if (m_currentTopicIndex == nullopt || m_topics[i].priority <= m_topics[*m_currentTopicIndex].priority ||
-            (ros::Time::now() - m_lastMessageTime) > m_topics[*m_currentTopicIndex].timeout)
+            (get_clock()->now() - m_lastMessageTime) > m_topics[*m_currentTopicIndex].timeout)
         {
             m_currentTopicIndex = i;
-            m_lastMessageTime = ros::Time::now();
-            m_publisher.publish(msg);
+            m_lastMessageTime = get_clock()->now();
+            m_publisher->publish(msg);
         }
-    }
-
-    void advertise(const boost::shared_ptr<topic_tools::ShapeShifter const>& msg)
-    {
-        m_publisher = msg->advertise(m_nodeHandle, "out", 10, m_latch);
-        m_hasAdvertised = true;
     }
 };
-
-
-bool getTopics(ros::NodeHandle& privateNodeHandle, vector<Topic>& topics)
-{
-    vector<string> value;
-
-    XmlRpc::XmlRpcValue xmlTopics;
-    privateNodeHandle.getParam("topics", xmlTopics);
-    if (xmlTopics.getType() != XmlRpc::XmlRpcValue::TypeArray)
-    {
-        ROS_ERROR("Invalid topics format");
-        return false;
-    }
-
-    for (size_t i = 0; i < xmlTopics.size(); i++)
-    {
-        if (xmlTopics[i].getType() != XmlRpc::XmlRpcValue::TypeStruct ||
-            xmlTopics[i]["name"].getType() != XmlRpc::XmlRpcValue::TypeString ||
-            xmlTopics[i]["priority"].getType() != XmlRpc::XmlRpcValue::TypeInt ||
-            xmlTopics[i]["timeout_s"].getType() != XmlRpc::XmlRpcValue::TypeDouble)
-        {
-            ROS_ERROR_STREAM(
-                "Invalid topics["
-                << i << "]: name must be a string, priority must be a int and timeout_s must be a double.");
-            return false;
-        }
-
-        topics.emplace_back(Topic{
-            static_cast<string>(xmlTopics[i]["name"]),
-            static_cast<int>(xmlTopics[i]["priority"]),
-            ros::Duration(static_cast<double>(xmlTopics[i]["timeout_s"]))});
-    }
-
-    return topics.size() > 0;
-}
-
-bool hasUniquePriority(const vector<Topic>& topics)
-{
-    unordered_set<int> priorities;
-
-    for (auto& topic : topics)
-    {
-        if (priorities.count(topic.priority) > 0)
-        {
-            return false;
-        }
-
-        priorities.insert(topic.priority);
-    }
-
-    return true;
-}
-
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "arbitration_node");
+    rclcpp::init(argc, argv);
 
-    ros::NodeHandle nodeHandle;
-    ros::NodeHandle privateNodeHandle("~");
-
-    vector<Topic> topics;
-    if (!getTopics(privateNodeHandle, topics))
+    try
     {
-        ROS_ERROR("The parameter topics must be set, not empty and valid.");
+        auto node = std::make_shared<ArbitrationNode>();
+        node->run();
+        rclcpp::shutdown();
+    }
+    catch (const std::exception& e)
+    {
+        RCLCPP_ERROR(rclcpp::get_logger(NODE_NAME), "%s", e.what());
+        rclcpp::shutdown();
         return -1;
     }
-    if (!hasUniquePriority(topics))
-    {
-        ROS_ERROR("The topic priorities must be unique.");
-        return -1;
-    }
-
-    bool latch;
-    if (!privateNodeHandle.getParam("latch", latch))
-    {
-        ROS_ERROR("The parameter latch is required.");
-        return -1;
-    }
-
-    ArbitrationNode node(nodeHandle, topics, latch);
-    node.run();
 
     return 0;
 }

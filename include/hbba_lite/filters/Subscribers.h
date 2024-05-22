@@ -1,7 +1,7 @@
 #ifndef HBBA_LITE_FILTERS_SUBSCRIBER_H
 #define HBBA_LITE_FILTERS_SUBSCRIBER_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <hbba_lite/filters/FilterState.h>
 
@@ -9,89 +9,45 @@ template<class FilterState, class MessageType>
 class HbbaSubscriber
 {
     FilterState m_filterState;
-    boost::function<void(const typename MessageType::ConstPtr&)> m_callback;
-    ros::Subscriber m_subscriber;
+    std::function<void(const typename MessageType::SharedPtr)> m_userCallback;
+    typename rclcpp::Subscription<MessageType>::SharedPtr m_subscriber;
 
 public:
-    template<class T>
     HbbaSubscriber(
-        ros::NodeHandle& nodeHandle,
+        std::shared_ptr<rclcpp::Node>& node,
         const std::string& topic,
         uint32_t queueSize,
-        void (T::*fp)(const typename MessageType::ConstPtr&),
-        T* obj,
-        const std::string& stateServiceName = "",
-        const ros::TransportHints& transportHints = ros::TransportHints());
-    HbbaSubscriber(
-        ros::NodeHandle& nodeHandle,
-        const std::string& topic,
-        uint32_t queueSize,
-        void (*fp)(const typename MessageType::ConstPtr&),
-        const std::string& stateServiceName = "",
-        const ros::TransportHints& transportHints = ros::TransportHints());
+        std::function<void(const typename MessageType::SharedPtr)> userCallback,
+        const std::string& stateServiceName = "");
 
-    uint32_t getNumPublishers() const;
     std::string getTopic() const;
-    void shutdown();
 
     bool isFilteringAllMessages() const;
 
 private:
-    void callback(const typename MessageType::ConstPtr& msg);
+    void callback(const typename MessageType::SharedPtr msg);
 };
 
 template<class FilterState, class MessageType>
-template<class T>
 HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
-    ros::NodeHandle& nodeHandle,
+    std::shared_ptr<rclcpp::Node>& node,
     const std::string& topic,
     uint32_t queueSize,
-    void (T::*fp)(const typename MessageType::ConstPtr&),
-    T* obj,
-    const std::string& stateServiceName,
-    const ros::TransportHints& transportHints)
-    : m_filterState(nodeHandle, stateServiceName == "" ? topic + "/filter_state" : stateServiceName)
+    std::function<void(const typename MessageType::SharedPtr)> userCallback,
+    const std::string& stateServiceName)
+    : m_filterState(node, stateServiceName == "" ? topic + "/filter_state" : stateServiceName),
+      m_userCallback(std::move(userCallback))
 {
-    m_callback = boost::bind(fp, obj, _1);
-    m_subscriber =
-        nodeHandle
-            .subscribe(topic, queueSize, &HbbaSubscriber<FilterState, MessageType>::callback, this, transportHints);
-}
-
-template<class FilterState, class MessageType>
-HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
-    ros::NodeHandle& nodeHandle,
-    const std::string& topic,
-    uint32_t queueSize,
-    void (*fp)(const typename MessageType::ConstPtr&),
-    const std::string& stateServiceName,
-    const ros::TransportHints& transportHints)
-    : m_filterState(nodeHandle, stateServiceName == "" ? topic + "/filter_state" : stateServiceName)
-{
-    m_callback = fp;
-    m_subscriber =
-        nodeHandle
-            .subscribe(topic, queueSize, &HbbaSubscriber<FilterState, MessageType>::callback, this, transportHints);
-}
-
-template<class FilterState, class MessageType>
-uint32_t HbbaSubscriber<FilterState, MessageType>::getNumPublishers() const
-{
-    return m_subscriber.getNumPublishers();
+    m_subscriber = node->create_subscription<MessageType>(topic,
+        queueSize,
+        [this] (const typename MessageType::SharedPtr msg) { callback(msg); });
 }
 
 template<class FilterState, class MessageType>
 std::string HbbaSubscriber<FilterState, MessageType>::getTopic() const
 {
-    return m_subscriber.getTopic();
+    return m_subscriber->get_topic_name();
 }
-
-template<class FilterState, class MessageType>
-void HbbaSubscriber<FilterState, MessageType>::shutdown()
-{
-    m_subscriber.shutdown();
-}
-
 template<class FilterState, class MessageType>
 bool HbbaSubscriber<FilterState, MessageType>::isFilteringAllMessages() const
 {
@@ -99,11 +55,11 @@ bool HbbaSubscriber<FilterState, MessageType>::isFilteringAllMessages() const
 }
 
 template<class FilterState, class MessageType>
-void HbbaSubscriber<FilterState, MessageType>::callback(const typename MessageType::ConstPtr& msg)
+void HbbaSubscriber<FilterState, MessageType>::callback(const typename MessageType::SharedPtr msg)
 {
-    if (m_filterState.check() && m_callback)
+    if (m_filterState.check() && m_userCallback)
     {
-        m_callback(msg);
+        m_userCallback(msg);
     }
 }
 

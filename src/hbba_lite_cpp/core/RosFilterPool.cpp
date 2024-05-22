@@ -1,13 +1,13 @@
 #include <hbba_lite/core/RosFilterPool.h>
 #include <hbba_lite/utils/HbbaLiteException.h>
 
-#include <hbba_lite/SetOnOffFilterState.h>
-#include <hbba_lite/SetThrottlingFilterState.h>
+#include <hbba_lite/srv/set_on_off_filter_state.hpp>
+#include <hbba_lite/srv/set_throttling_filter_state.hpp>
 
 using namespace std;
 
-RosFilterPool::RosFilterPool(ros::NodeHandle& nodeHandle, bool waitForService)
-    : m_nodeHandle(nodeHandle),
+RosFilterPool::RosFilterPool(shared_ptr<rclcpp::Node> node, bool waitForService)
+    : m_node(move(node)),
       m_waitForService(waitForService)
 {
 }
@@ -20,11 +20,11 @@ void RosFilterPool::add(const string& name, FilterType type)
     switch (type)
     {
         case FilterType::ON_OFF:
-            m_serviceClientsByName[name] = m_nodeHandle.serviceClient<hbba_lite::SetOnOffFilterState>(name, true);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite::srv::SetOnOffFilterState>(name);
             break;
 
         case FilterType::THROTTLING:
-            m_serviceClientsByName[name] = m_nodeHandle.serviceClient<hbba_lite::SetThrottlingFilterState>(name, true);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite::srv::SetThrottlingFilterState>(name);
             break;
 
         default:
@@ -38,18 +38,18 @@ void RosFilterPool::applyEnabling(const string& name, const FilterConfiguration&
     {
         case FilterType::ON_OFF:
         {
-            hbba_lite::SetOnOffFilterState srv;
-            srv.request.is_filtering_all_messages = false;
-            call(name, srv);
+            auto request = make_shared<hbba_lite::srv::SetOnOffFilterState::Request>();
+            request->is_filtering_all_messages = false;
+            call<hbba_lite::srv::SetOnOffFilterState>(name, request);
         }
         break;
 
         case FilterType::THROTTLING:
         {
-            hbba_lite::SetThrottlingFilterState srv;
-            srv.request.is_filtering_all_messages = false;
-            srv.request.rate = configuration.rate();
-            call(name, srv);
+            auto request = make_shared<hbba_lite::srv::SetThrottlingFilterState::Request>();
+            request->is_filtering_all_messages = false;
+            request->rate = configuration.rate();
+            call<hbba_lite::srv::SetThrottlingFilterState>(name, request);
         }
         break;
 
@@ -64,18 +64,18 @@ void RosFilterPool::applyDisabling(const string& name)
     {
         case FilterType::ON_OFF:
         {
-            hbba_lite::SetOnOffFilterState srv;
-            srv.request.is_filtering_all_messages = true;
-            call(name, srv);
+            auto request = make_shared<hbba_lite::srv::SetOnOffFilterState::Request>();
+            request->is_filtering_all_messages = true;
+            call<hbba_lite::srv::SetOnOffFilterState>(name, request);
         }
         break;
 
         case FilterType::THROTTLING:
         {
-            hbba_lite::SetThrottlingFilterState srv;
-            srv.request.is_filtering_all_messages = true;
-            srv.request.rate = 1;
-            call(name, srv);
+            auto request = make_shared<hbba_lite::srv::SetThrottlingFilterState::Request>();
+            request->is_filtering_all_messages = true;
+            request->rate = 1;
+            call<hbba_lite::srv::SetThrottlingFilterState>(name, request);
         }
         break;
 
@@ -84,29 +84,31 @@ void RosFilterPool::applyDisabling(const string& name)
     }
 }
 
-RosLogFilterPoolDecorator::RosLogFilterPoolDecorator(unique_ptr<FilterPool> filterPool) : m_filterPool(move(filterPool))
+RosLogFilterPoolDecorator::RosLogFilterPoolDecorator(shared_ptr<rclcpp::Node> node, unique_ptr<FilterPool> filterPool)
+    : m_node(move(node)),
+      m_filterPool(move(filterPool))
 {
 }
 
-void RosLogFilterPoolDecorator::add(const std::string& name, FilterType type)
+void RosLogFilterPoolDecorator::add(const string& name, FilterType type)
 {
     lock_guard<recursive_mutex> lock(m_mutex);
     FilterPool::add(name, type);
     m_filterPool->add(name, type);
 }
 
-void RosLogFilterPoolDecorator::applyEnabling(const std::string& name, const FilterConfiguration& configuration)
+void RosLogFilterPoolDecorator::applyEnabling(const string& name, const FilterConfiguration& configuration)
 {
     callApplyEnabling(*m_filterPool, name, configuration);
 
     switch (configuration.type())
     {
         case FilterType::ON_OFF:
-            ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> enabled");
+            RCLCPP_INFO_STREAM(m_node->get_logger(), "HBBA filter state changed: " << name << " -> enabled");
             break;
 
         case FilterType::THROTTLING:
-            ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> enabled (" << configuration.rate() << ")");
+            RCLCPP_INFO_STREAM(m_node->get_logger(), "HBBA filter state changed: " << name << " -> enabled (" << configuration.rate() << ")");
             break;
 
         default:
@@ -117,5 +119,5 @@ void RosLogFilterPoolDecorator::applyEnabling(const std::string& name, const Fil
 void RosLogFilterPoolDecorator::applyDisabling(const std::string& name)
 {
     callApplyDisabling(*m_filterPool, name);
-    ROS_INFO_STREAM("HBBA filter state changed: " << name << " -> disabled");
+    RCLCPP_INFO_STREAM(m_node->get_logger(), "HBBA filter state changed: " << name << " -> disabled");
 }

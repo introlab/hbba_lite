@@ -3,12 +3,16 @@
 
 #include <hbba_lite/core/StrategyStateLogger.h>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+
+#include <hbba_lite/msg/strategy_state.hpp>
 
 class RosLogStrategyStateLogger : public StrategyStateLogger
 {
+    std::shared_ptr<rclcpp::Node> m_node;
+
 public:
-    RosLogStrategyStateLogger() = default;
+    explicit RosLogStrategyStateLogger(std::shared_ptr<rclcpp::Node> node);
     ~RosLogStrategyStateLogger() override = default;
 
     DECLARE_NOT_COPYABLE(RosLogStrategyStateLogger);
@@ -20,11 +24,11 @@ public:
 
 class RosTopicStrategyStateLogger : public StrategyStateLogger
 {
-    ros::NodeHandle& m_nodeHandle;
-    ros::Publisher m_strategyStatePub;
+    std::shared_ptr<rclcpp::Node> m_node;
+    rclcpp::Publisher<hbba_lite::msg::StrategyState>::SharedPtr m_strategyStatePub;
 
 public:
-    RosTopicStrategyStateLogger(ros::NodeHandle& nodeHandle);
+    explicit RosTopicStrategyStateLogger(std::shared_ptr<rclcpp::Node> node);
     ~RosTopicStrategyStateLogger() override = default;
 
     DECLARE_NOT_COPYABLE(RosTopicStrategyStateLogger);

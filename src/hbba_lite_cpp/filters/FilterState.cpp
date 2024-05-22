@@ -2,10 +2,12 @@
 
 using namespace std;
 
-OnOffHbbaFilterState::OnOffHbbaFilterState(ros::NodeHandle& nodeHandle, const string& stateServiceName)
+OnOffHbbaFilterState::OnOffHbbaFilterState(const shared_ptr<rclcpp::Node>& node, const string& stateServiceName)
     : m_isFilteringAllMessages(true)
 {
-    m_stateService = nodeHandle.advertiseService(stateServiceName, &OnOffHbbaFilterState::stateServiceCallback, this);
+    using namespace std::placeholders;
+    m_stateService = node->create_service<hbba_lite::srv::SetOnOffFilterState>(stateServiceName,
+        bind(&OnOffHbbaFilterState::stateServiceCallback, this, _1, _2));
 }
 
 bool OnOffHbbaFilterState::check()
@@ -13,22 +15,22 @@ bool OnOffHbbaFilterState::check()
     return !m_isFilteringAllMessages;
 }
 
-bool OnOffHbbaFilterState::stateServiceCallback(
-    hbba_lite::SetOnOffFilterState::Request& request,
-    hbba_lite::SetOnOffFilterState::Response& response)
+void OnOffHbbaFilterState::stateServiceCallback(
+    const shared_ptr<hbba_lite::srv::SetOnOffFilterState::Request> request,
+    shared_ptr<hbba_lite::srv::SetOnOffFilterState::Response> response)
 {
-    m_isFilteringAllMessages = request.is_filtering_all_messages;
-    response.ok = true;
-    return true;
+    m_isFilteringAllMessages = request->is_filtering_all_messages;
+    response->ok = true;
 }
 
-ThrottlingHbbaFilterState::ThrottlingHbbaFilterState(ros::NodeHandle& nodeHandle, const string& stateServiceName)
+ThrottlingHbbaFilterState::ThrottlingHbbaFilterState(const shared_ptr<rclcpp::Node>& node, const string& stateServiceName)
     : m_isFilteringAllMessages(true),
       m_rate(1),
       m_counter(0)
 {
-    m_stateService =
-        nodeHandle.advertiseService(stateServiceName, &ThrottlingHbbaFilterState::stateServiceCallback, this);
+    using namespace std::placeholders;
+    m_stateService = node->create_service<hbba_lite::srv::SetThrottlingFilterState>(stateServiceName,
+        bind(&ThrottlingHbbaFilterState::stateServiceCallback, this, _1, _2));
 }
 
 bool ThrottlingHbbaFilterState::check()
@@ -47,22 +49,20 @@ bool ThrottlingHbbaFilterState::check()
     return isReady;
 }
 
-bool ThrottlingHbbaFilterState::stateServiceCallback(
-    hbba_lite::SetThrottlingFilterState::Request& request,
-    hbba_lite::SetThrottlingFilterState::Response& response)
+void ThrottlingHbbaFilterState::stateServiceCallback(
+    const shared_ptr<hbba_lite::srv::SetThrottlingFilterState::Request> request,
+    shared_ptr<hbba_lite::srv::SetThrottlingFilterState::Response> response)
 {
-    if (request.rate <= 0)
+    if (request->rate <= 0)
     {
-        response.ok = false;
+        response->ok = false;
     }
     else
     {
-        m_isFilteringAllMessages = request.is_filtering_all_messages;
-        m_rate = request.rate;
+        m_isFilteringAllMessages = request->is_filtering_all_messages;
+        m_rate = request->rate;
         m_counter = 0;
 
-        response.ok = true;
+        response->ok = true;
     }
-
-    return true;
 }

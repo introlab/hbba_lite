@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="hbba_lite" exec="dummy_synchronized_publishers.py" name="dummy_synchronized_publishers" />
+
+    <node pkg="hbba_lite" exec="throttling_hbba_filter_node" name="throttling_hbba_filter_node">
+        <param name="input_topic" value="int_topic_1"/>
+        <param name="output_topic" value="int_topic_1/filtered"/>
+        <param name="state_service" value="int_topic_1/filter_state"/>
+    </node>
+</launch>

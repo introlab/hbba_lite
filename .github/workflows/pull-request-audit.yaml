@@ -21,7 +21,7 @@ jobs:
 
       - uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: noetic
+          required-ros-distributions: foxy
 
       - name: Install system dependencies
         run: |
@@ -32,10 +32,11 @@ jobs:
         working-directory: catkin_ws
         run: |
           source /opt/ros/noetic/setup.bash
-          catkin_make -j1
+          colcon build
 
       - name: Run tests
         working-directory: catkin_ws
         run: |
-          source /opt/ros/noetic/setup.bash
-          catkin_make run_tests
+          source /opt/ros/foxy/setup.bash
+          colcon test --packages-up-to hbba_lite
+          colcon test-result --all --verbose

@@ -1,20 +1,21 @@
-#include <ros/ros.h>
-#include <std_msgs/Int8.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <hbba_lite/filters/Subscribers.h>
-
-void callback(const std_msgs::Int8::ConstPtr& msg)
-{
-    ROS_INFO("Data received : %i", static_cast<int>(msg->data));
-}
+#include <hbba_lite/msg/int32_stamped.hpp>
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "test_on_off_hbba_subscriber");
-    ros::NodeHandle nodeHandle;
+    rclcpp::init(argc, argv);
 
-    ThrottlingHbbaSubscriber<std_msgs::Int8> sub(nodeHandle, "int_topic", 10, &callback);
-    ros::spin();
+    auto node = rclcpp::Node::make_shared("test_on_off_hbba_subscriber");
+    ThrottlingHbbaSubscriber<hbba_lite::msg::Int32Stamped> sub(node, "int_topic_1", 10,
+        [node](const hbba_lite::msg::Int32Stamped::SharedPtr msg)
+        {
+            RCLCPP_INFO(node->get_logger(), "Data received : %i", static_cast<int>(msg->data));
+        });
+
+    rclcpp::spin(node);
+    rclcpp::shutdown();
 
     return 0;
 }

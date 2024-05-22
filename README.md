@@ -2,6 +2,8 @@
 
 This is a lite version of [HBBA](https://github.com/francoisferland/hbba).
 
+For ROS1, please see the `main-ros1` branch.
+
 The main differences are :
 
 - Desires cannot have dependencies;
@@ -10,6 +12,9 @@ The main differences are :
 - Two kinds of filters exist: on/off and throttling;
 - It use [Gecode](https://www.gecode.org/) instead of [OR-Tools](https://developers.google.com/optimization) for the
   solver.
+
+## Integrated Code
+The code in `src/rosbag2_generic_topic` and `include/rosbag2_generic_topic` folders are from [rosbag2](https://github.com/ros2/rosbag2)
 
 ## Dependencies
 
@@ -491,8 +496,9 @@ This node applies priority arbitration to topics.
 
 #### Parameters
 
-- `topics`: The topic descriptions containing the topic name (string), priority (int, lower means higher priority) and timeout_s value (double).
-- `latch` (bool): Indicates if the output topic is latched.
+- `topics` (string): The topic names.
+- `priorities` (int): The priority for each topic (int, lower means higher priority).
+- `timeout_s` (double): The timeout in seconds for each topic.
 
 #### Published Topics
 
@@ -502,25 +508,37 @@ This node applies priority arbitration to topics.
 
 This node applies an on/off filter on a topic.
 
+#### Parameters
+
+- `input_topic` (string): The input topic name.
+- `output_topic` (string): The filtered topic name.
+- `state_service` (string): The service name to change the filter state.
+
 #### Topics
 
-- `in` (Any): The input topic.
-- `out` (Any): The filtered topic.
+- Defined by the parameter `input_topic` (Any): The input topic.
+- Defined by the parameter `output_topic` (Any): The filtered topic.
 
 #### Services
 
-- `filter_state` ([hbba_lite/SetOnOffFilterState](srv/SetOnOffFilterState.srv)) The service to change the filter state.
+- Defined by the parameter `state_service` ([hbba_lite/SetOnOffFilterState](srv/SetOnOffFilterState.srv)): The service to change the filter state.
 
 ### `throttling_hbba_filter_node`
 
 This node applies a throttling filter on a topic.
 
+#### Parameters
+
+- `input_topic` (string): The input topic name.
+- `output_topic` (string): The filtered topic name.
+- `state_service` (string): The service name to change the filter state.
+
 #### Topics
 
-- `in` (Any): The input topic.
-- `out` (Any): The filtered topic.
+- Defined by the parameter `input_topic` (Any): The input topic.
+- Defined by the parameter `output_topic` (Any): The filtered topic.
 
 #### Services
 
-- `filter_state` ([hbba_lite/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
+- Defined by the parameter `state_service` ([hbba_lite/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
   filter state.
