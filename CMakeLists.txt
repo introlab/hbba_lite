@@ -68,9 +68,9 @@ target_link_libraries(hbba_lite_cpp
 rosidl_target_interfaces(hbba_lite_cpp ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS hbba_lite_cpp DESTINATION lib)
 
-ament_export_libraries(hbba_lite_cpp)
+ament_export_dependencies(rclcpp)
 ament_export_include_directories(include)
-ament_export_dependencies(rclcpp hbba_lite_cpp)
+ament_export_libraries(hbba_lite_cpp)
 
 add_library(rosbag2_generic_topic
   src/rosbag2_generic_topic/generic_publisher.cpp
@@ -125,9 +125,10 @@ rosidl_target_interfaces(test_throttling_hbba_subscriber ${PROJECT_NAME} "rosidl
 install(TARGETS test_throttling_hbba_subscriber DESTINATION lib/${PROJECT_NAME})
 
 
-# Python Nodes
+# Python Librairies
 ament_python_install_package(${PROJECT_NAME})
 
+# Python Nodes
 install(PROGRAMS
   scripts/dummy_synchronized_publishers.py
   scripts/test_arbitration_publisher.py
@@ -144,7 +145,8 @@ install(PROGRAMS
 
 # Launch files
 install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME})
+  DESTINATION share/${PROJECT_NAME}
+)
 
 # Tests
 if(BUILD_TESTING)
