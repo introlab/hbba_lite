@@ -7,7 +7,7 @@ if(NOT CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 99)
 endif()
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -71,6 +71,19 @@ install(TARGETS hbba_lite_cpp DESTINATION lib)
 ament_export_dependencies(rclcpp)
 ament_export_include_directories(include)
 ament_export_libraries(hbba_lite_cpp)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS hbba_lite_cpp
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
 
 add_library(rosbag2_generic_topic
   src/rosbag2_generic_topic/generic_publisher.cpp
@@ -144,9 +157,7 @@ install(PROGRAMS
 )
 
 # Launch files
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 # Tests
 if(BUILD_TESTING)
