@@ -15,14 +15,15 @@ def main():
         node.get_logger().info('Data received : {}'.format(data.data))
 
     _ = hbba_lite.OnOffHbbaSubscriber(node, Int32Stamped, 'int_topic_1', callback, 10)
-    rclpy.spin(node)
 
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()

@@ -10,6 +10,7 @@ def main():
     rclpy.init()
 
     node = rclpy.node.Node('test_on_off_hbba_publisher')
+
     pub1 = node.create_publisher(Int32Stamped, 'int_topic_1', 10)
     pub2 = node.create_publisher(Int32Stamped, 'int_topic_2', 10)
     i = 0
@@ -34,14 +35,15 @@ def main():
         i += 1
 
     timer = node.create_timer(1, callback)
-    rclpy.spin(node)
 
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()

@@ -18,14 +18,15 @@ def main():
         pub.publish(msg)
 
     timer = node.create_timer(1 / rate, callback)
-    rclpy.spin(node)
 
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()

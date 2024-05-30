@@ -19,14 +19,15 @@ def main():
     sub1 = message_filters.Subscriber(node, Int32Stamped, 'int_topic_1')
     sub2 = message_filters.Subscriber(node, Int32Stamped, 'int_topic_2')
     _ = hbba_lite.ThrottlingHbbaTimeSynchronizer(node, [sub1, sub2], 10, callback, 'int_topics/filter_state')
-    rclpy.spin(node)
 
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()
