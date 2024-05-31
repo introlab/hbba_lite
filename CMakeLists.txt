@@ -16,7 +16,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+# Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
@@ -77,14 +77,6 @@ install(
   DESTINATION include
 )
 
-install(
-  TARGETS hbba_lite_cpp
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
 add_library(rosbag2_generic_topic
   src/rosbag2_generic_topic/generic_publisher.cpp
   src/rosbag2_generic_topic/generic_subscription.cpp
@@ -93,6 +85,18 @@ add_library(rosbag2_generic_topic
 ament_target_dependencies(rosbag2_generic_topic rclcpp rosbag2_cpp)
 target_link_libraries(rosbag2_generic_topic)
 install(TARGETS rosbag2_generic_topic DESTINATION lib)
+
+ament_export_dependencies(rclcpp)
+ament_export_include_directories(include)
+ament_export_libraries(hbba_lite_cpp rosbag2_generic_topic)
+
+install(
+  TARGETS hbba_lite_cpp
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
 
 # C++ Nodes
 add_executable(arbitration_node src/arbitration_node.cpp)
