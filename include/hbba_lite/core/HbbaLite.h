@@ -40,7 +40,7 @@ class HbbaLite : public DesireSetObserver
     std::unique_ptr<StrategyStateLogger> m_strategyStateLogger;
 
     std::mutex m_pendingDesiresMutex;
-    sem_t m_pendingDesiresSemaphore; // TODO remplace with C++20 semaphore
+    sem_t m_pendingDesiresSemaphore;  // TODO remplace with C++20 semaphore
     std::optional<std::vector<std::unique_ptr<Desire>>> m_pendingDesires;
 
     std::atomic_bool m_stopped;

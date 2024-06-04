@@ -93,8 +93,14 @@ namespace std
 }
 
 #define DECLARE_DESIRE_METHODS(className)                                                                              \
-    std::unique_ptr<Desire> clone() override { return std::make_unique<className>(*this); }                            \
-    DesireType type() override { return DesireType::get<className>(); }
+    std::unique_ptr<Desire> clone() override                                                                           \
+    {                                                                                                                  \
+        return std::make_unique<className>(*this);                                                                     \
+    }                                                                                                                  \
+    DesireType type() override                                                                                         \
+    {                                                                                                                  \
+        return DesireType::get<className>();                                                                           \
+    }
 
 class Desire
 {

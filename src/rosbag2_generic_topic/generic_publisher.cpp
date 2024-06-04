@@ -19,33 +19,35 @@
 
 namespace
 {
-rcl_publisher_options_t rosbag2_get_publisher_options(const rclcpp::QoS & qos)
-{
-  auto options = rcl_publisher_get_default_options();
-  options.qos = qos.get_rmw_qos_profile();
-  return options;
-}
+    rcl_publisher_options_t rosbag2_get_publisher_options(const rclcpp::QoS& qos)
+    {
+        auto options = rcl_publisher_get_default_options();
+        options.qos = qos.get_rmw_qos_profile();
+        return options;
+    }
 }  // unnamed namespace
 
 namespace rosbag2_generic_topic
 {
 
-GenericPublisher::GenericPublisher(
-  rclcpp::node_interfaces::NodeBaseInterface * node_base,
-  const rosidl_message_type_support_t & type_support,
-  const std::string & topic_name,
-  const rclcpp::QoS & qos)
-: rclcpp::PublisherBase(node_base, topic_name, type_support, rosbag2_get_publisher_options(qos))
-{}
+    GenericPublisher::GenericPublisher(
+        rclcpp::node_interfaces::NodeBaseInterface* node_base,
+        const rosidl_message_type_support_t& type_support,
+        const std::string& topic_name,
+        const rclcpp::QoS& qos)
+        : rclcpp::PublisherBase(node_base, topic_name, type_support, rosbag2_get_publisher_options(qos))
+    {
+    }
 
-void GenericPublisher::publish(std::shared_ptr<rclcpp::SerializedMessage> message)
-{
-  auto return_code = rcl_publish_serialized_message(
-    get_publisher_handle().get(), &message->get_rcl_serialized_message(), NULL);
+    void GenericPublisher::publish(std::shared_ptr<rclcpp::SerializedMessage> message)
+    {
+        auto return_code =
+            rcl_publish_serialized_message(get_publisher_handle().get(), &message->get_rcl_serialized_message(), NULL);
 
-  if (return_code != RCL_RET_OK) {
-    rclcpp::exceptions::throw_from_rcl_error(return_code, "failed to publish serialized message");
-  }
-}
+        if (return_code != RCL_RET_OK)
+        {
+            rclcpp::exceptions::throw_from_rcl_error(return_code, "failed to publish serialized message");
+        }
+    }
 
 }  // namespace rosbag2_generic_topic

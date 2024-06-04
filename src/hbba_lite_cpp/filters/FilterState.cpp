@@ -6,7 +6,8 @@ OnOffHbbaFilterState::OnOffHbbaFilterState(const shared_ptr<rclcpp::Node>& node,
     : m_isFilteringAllMessages(true)
 {
     using namespace std::placeholders;
-    m_stateService = node->create_service<hbba_lite::srv::SetOnOffFilterState>(stateServiceName,
+    m_stateService = node->create_service<hbba_lite::srv::SetOnOffFilterState>(
+        stateServiceName,
         bind(&OnOffHbbaFilterState::stateServiceCallback, this, _1, _2));
 }
 
@@ -23,13 +24,16 @@ void OnOffHbbaFilterState::stateServiceCallback(
     response->ok = true;
 }
 
-ThrottlingHbbaFilterState::ThrottlingHbbaFilterState(const shared_ptr<rclcpp::Node>& node, const string& stateServiceName)
+ThrottlingHbbaFilterState::ThrottlingHbbaFilterState(
+    const shared_ptr<rclcpp::Node>& node,
+    const string& stateServiceName)
     : m_isFilteringAllMessages(true),
       m_rate(1),
       m_counter(0)
 {
     using namespace std::placeholders;
-    m_stateService = node->create_service<hbba_lite::srv::SetThrottlingFilterState>(stateServiceName,
+    m_stateService = node->create_service<hbba_lite::srv::SetThrottlingFilterState>(
+        stateServiceName,
         bind(&ThrottlingHbbaFilterState::stateServiceCallback, this, _1, _2));
 }
 

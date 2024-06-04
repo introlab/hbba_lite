@@ -2,16 +2,15 @@
 
 using namespace std;
 
-RosLogStrategyStateLogger::RosLogStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(move(node))
-{
-}
+RosLogStrategyStateLogger::RosLogStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(move(node)) {}
 
 void RosLogStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled)
 {
     RCLCPP_INFO_STREAM(
         m_node->get_logger(),
         "HBBA strategy state changed: "
-        << "( " << desireType.name() << ", " << strategyType.name() << ") -> " << (enabled ? "enabled" : "disabled"));
+            << "( " << desireType.name() << ", " << strategyType.name() << ") -> "
+            << (enabled ? "enabled" : "disabled"));
 }
 
 

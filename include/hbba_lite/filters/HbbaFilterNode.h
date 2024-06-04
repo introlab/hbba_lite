@@ -32,11 +32,24 @@ template<class FilterState>
 inline HbbaFilterNode<FilterState>::HbbaFilterNode(const std::string& nodeName)
     : rosbag2_generic_topic::Rosbag2Node(nodeName)
 {
-    m_inputTopic = rclcpp::expand_topic_or_service_name(declare_parameter("input_topic", "in"), get_name(), get_namespace(), false);
-    m_outputTopic = rclcpp::expand_topic_or_service_name(declare_parameter("output_topic", "out"), get_name(), get_namespace(), false);
-    m_stateService = rclcpp::expand_topic_or_service_name(declare_parameter("state_service", "filter_state"), get_name(), get_namespace(), true);
+    m_inputTopic = rclcpp::expand_topic_or_service_name(
+        declare_parameter("input_topic", "in"),
+        get_name(),
+        get_namespace(),
+        false);
+    m_outputTopic = rclcpp::expand_topic_or_service_name(
+        declare_parameter("output_topic", "out"),
+        get_name(),
+        get_namespace(),
+        false);
+    m_stateService = rclcpp::expand_topic_or_service_name(
+        declare_parameter("state_service", "filter_state"),
+        get_name(),
+        get_namespace(),
+        true);
 
-    m_initTimer = create_wall_timer(std::chrono::seconds(1), std::bind(&HbbaFilterNode<FilterState>::initTimerCallback, this));
+    m_initTimer =
+        create_wall_timer(std::chrono::seconds(1), std::bind(&HbbaFilterNode<FilterState>::initTimerCallback, this));
 }
 
 template<class FilterState>
@@ -57,7 +70,10 @@ void HbbaFilterNode<FilterState>::initTimerCallback()
 
     m_filterState = std::make_unique<FilterState>(shared_from_this(), m_stateService);
 
-    m_subscriber = create_generic_subscription(m_inputTopic, it->second[0], 10,
+    m_subscriber = create_generic_subscription(
+        m_inputTopic,
+        it->second[0],
+        10,
         [this](std::shared_ptr<rclcpp::SerializedMessage> msg)
         {
             if (m_filterState->check())

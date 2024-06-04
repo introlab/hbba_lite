@@ -27,9 +27,7 @@ class ArbitrationNode : public rosbag2_generic_topic::Rosbag2Node
     rclcpp::Time m_lastMessageTime;
 
 public:
-    ArbitrationNode()
-        : rosbag2_generic_topic::Rosbag2Node(NODE_NAME),
-          m_lastMessageTime(get_clock()->now())
+    ArbitrationNode() : rosbag2_generic_topic::Rosbag2Node(NODE_NAME), m_lastMessageTime(get_clock()->now())
     {
         m_topics = convertToTopics(
             declare_parameter("topics", vector<string>{}),
@@ -43,13 +41,11 @@ public:
         m_initTimer = create_wall_timer(std::chrono::seconds(1), std::bind(&ArbitrationNode::initTimerCallback, this));
     }
 
-    void run()
-    {
-        rclcpp::spin(shared_from_this());
-    }
+    void run() { rclcpp::spin(shared_from_this()); }
 
 private:
-    vector<Topic> convertToTopics(const vector<string>& topics, const vector<int64_t>& priorities, const vector<double>& timeoutS)
+    vector<Topic>
+        convertToTopics(const vector<string>& topics, const vector<int64_t>& priorities, const vector<double>& timeoutS)
     {
         if (topics.size() != priorities.size() || topics.size() != timeoutS.size())
         {

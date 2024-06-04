@@ -108,7 +108,9 @@ void RosLogFilterPoolDecorator::applyEnabling(const string& name, const FilterCo
             break;
 
         case FilterType::THROTTLING:
-            RCLCPP_INFO_STREAM(m_node->get_logger(), "HBBA filter state changed: " << name << " -> enabled (" << configuration.rate() << ")");
+            RCLCPP_INFO_STREAM(
+                m_node->get_logger(),
+                "HBBA filter state changed: " << name << " -> enabled (" << configuration.rate() << ")");
             break;
 
         default:

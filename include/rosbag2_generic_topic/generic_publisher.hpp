@@ -23,19 +23,19 @@
 namespace rosbag2_generic_topic
 {
 
-class GenericPublisher : public rclcpp::PublisherBase
-{
-public:
-  GenericPublisher(
-    rclcpp::node_interfaces::NodeBaseInterface * node_base,
-    const rosidl_message_type_support_t & type_support,
-    const std::string & topic_name,
-    const rclcpp::QoS & qos);
+    class GenericPublisher : public rclcpp::PublisherBase
+    {
+    public:
+        GenericPublisher(
+            rclcpp::node_interfaces::NodeBaseInterface* node_base,
+            const rosidl_message_type_support_t& type_support,
+            const std::string& topic_name,
+            const rclcpp::QoS& qos);
 
-  virtual ~GenericPublisher() = default;
+        virtual ~GenericPublisher() = default;
 
-  void publish(std::shared_ptr<rclcpp::SerializedMessage> message);
-};
+        void publish(std::shared_ptr<rclcpp::SerializedMessage> message);
+    };
 
 }  // namespace rosbag2_generic_topic
 

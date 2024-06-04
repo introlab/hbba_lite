@@ -38,9 +38,10 @@ HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
     : m_filterState(node, stateServiceName == "" ? topic + "/filter_state" : stateServiceName),
       m_userCallback(std::move(userCallback))
 {
-    m_subscriber = node->create_subscription<MessageType>(topic,
+    m_subscriber = node->create_subscription<MessageType>(
+        topic,
         queueSize,
-        [this] (const typename MessageType::SharedPtr msg) { callback(msg); });
+        [this](const typename MessageType::SharedPtr msg) { callback(msg); });
 }
 
 template<class FilterState, class MessageType>
