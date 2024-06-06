@@ -2,19 +2,19 @@
 import rclpy
 import rclpy.node
 
-from hbba_lite.msg import Int32Stamped
+from hbba_lite_msgs.msg import Int32Stamped
 
 import hbba_lite
 
 
 def main():
     rclpy.init()
-    node = rclpy.node.Node('test_on_off_hbba_subscriber')
+    node = rclpy.node.Node('test_throttling_hbba_subscriber')
 
     def callback(data):
         node.get_logger().info('Data received : {}'.format(data.data))
 
-    _ = hbba_lite.OnOffHbbaSubscriber(node, Int32Stamped, 'int_topic_1', callback, 10)
+    _ = hbba_lite.ThrottlingHbbaSubscriber(node, Int32Stamped, 'int_topic_1', callback, 10)
 
     try:
         rclpy.spin(node)

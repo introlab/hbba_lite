@@ -5,7 +5,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <hbba_lite/msg/strategy_state.hpp>
+#include <hbba_lite_msgs/msg/strategy_state.hpp>
 
 class RosLogStrategyStateLogger : public StrategyStateLogger
 {
@@ -25,7 +25,7 @@ public:
 class RosTopicStrategyStateLogger : public StrategyStateLogger
 {
     std::shared_ptr<rclcpp::Node> m_node;
-    rclcpp::Publisher<hbba_lite::msg::StrategyState>::SharedPtr m_strategyStatePub;
+    rclcpp::Publisher<hbba_lite_msgs::msg::StrategyState>::SharedPtr m_strategyStatePub;
 
 public:
     explicit RosTopicStrategyStateLogger(std::shared_ptr<rclcpp::Node> node);

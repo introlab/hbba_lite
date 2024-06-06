@@ -3,7 +3,7 @@ import rclpy
 import rclpy.node
 
 from std_msgs.msg import Header
-from hbba_lite.msg import Int32Stamped
+from hbba_lite_msgs.msg import Int32Stamped
 
 
 def main():

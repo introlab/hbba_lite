@@ -21,17 +21,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(hbba_lite_msgs REQUIRED)
+find_package(hbba_lite_srvs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Int32Stamped.msg"
-  "msg/StrategyState.msg"
-  "srv/SetOnOffFilterState.srv"
-  "srv/SetThrottlingFilterState.srv"
-  DEPENDENCIES std_msgs
-)
 
 # C++ Library
 include_directories(
@@ -52,7 +45,7 @@ add_library(hbba_lite_cpp
   src/hbba_lite_cpp/core/RosStrategyStateLogger.cpp
   src/hbba_lite_cpp/core/HbbaLite.cpp
 )
-ament_target_dependencies(hbba_lite_cpp rclcpp)
+ament_target_dependencies(hbba_lite_cpp rclcpp hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(hbba_lite_cpp
   gecodeflatzinc
   gecodedriver
@@ -65,33 +58,27 @@ target_link_libraries(hbba_lite_cpp
   gecodekernel
   gecodesupport
 )
-rosidl_target_interfaces(hbba_lite_cpp ${PROJECT_NAME} "rosidl_typesupport_cpp")
-install(TARGETS hbba_lite_cpp DESTINATION lib)
 
-ament_export_dependencies(rclcpp)
-ament_export_include_directories(include)
-ament_export_libraries(hbba_lite_cpp)
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
 
 add_library(rosbag2_generic_topic
   src/rosbag2_generic_topic/generic_publisher.cpp
   src/rosbag2_generic_topic/generic_subscription.cpp
   src/rosbag2_generic_topic/rosbag2_node.cpp
 )
-ament_target_dependencies(rosbag2_generic_topic rclcpp rosbag2_cpp)
+ament_target_dependencies(rosbag2_generic_topic rclcpp rosbag2_cpp hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(rosbag2_generic_topic)
-install(TARGETS rosbag2_generic_topic DESTINATION lib)
 
-ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclcpp rosbag2_cpp hbba_lite_msgs hbba_lite_srvs)
 ament_export_include_directories(include)
 ament_export_libraries(hbba_lite_cpp rosbag2_generic_topic)
 
 install(
-  TARGETS hbba_lite_cpp
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS hbba_lite_cpp rosbag2_generic_topic
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -100,45 +87,39 @@ install(
 
 # C++ Nodes
 add_executable(arbitration_node src/arbitration_node.cpp)
-ament_target_dependencies(arbitration_node rclcpp std_msgs)
+ament_target_dependencies(arbitration_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(arbitration_node hbba_lite_cpp rosbag2_generic_topic)
 install(TARGETS arbitration_node DESTINATION lib/${PROJECT_NAME})
 
 add_executable(on_off_hbba_filter_node src/on_off_hbba_filter_node.cpp)
-ament_target_dependencies(on_off_hbba_filter_node rclcpp std_msgs)
+ament_target_dependencies(on_off_hbba_filter_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(on_off_hbba_filter_node hbba_lite_cpp rosbag2_generic_topic)
-rosidl_target_interfaces(on_off_hbba_filter_node ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS on_off_hbba_filter_node DESTINATION lib/${PROJECT_NAME})
 
 add_executable(throttling_hbba_filter_node src/throttling_hbba_filter_node.cpp)
-ament_target_dependencies(throttling_hbba_filter_node rclcpp std_msgs)
+ament_target_dependencies(throttling_hbba_filter_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(throttling_hbba_filter_node hbba_lite_cpp rosbag2_generic_topic)
-rosidl_target_interfaces(throttling_hbba_filter_node ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS throttling_hbba_filter_node DESTINATION lib/${PROJECT_NAME})
 
 # C++ Test Nodes
 add_executable(test_on_off_hbba_publisher src/hbba_lite_cpp_tests/test_on_off_hbba_publisher.cpp)
-ament_target_dependencies(test_on_off_hbba_publisher rclcpp std_msgs)
+ament_target_dependencies(test_on_off_hbba_publisher rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(test_on_off_hbba_publisher hbba_lite_cpp)
-rosidl_target_interfaces(test_on_off_hbba_publisher ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS test_on_off_hbba_publisher DESTINATION lib/${PROJECT_NAME})
 
 add_executable(test_on_off_hbba_subscriber src/hbba_lite_cpp_tests/test_on_off_hbba_subscriber.cpp)
-ament_target_dependencies(test_on_off_hbba_subscriber rclcpp std_msgs)
+ament_target_dependencies(test_on_off_hbba_subscriber rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(test_on_off_hbba_subscriber hbba_lite_cpp)
-rosidl_target_interfaces(test_on_off_hbba_subscriber ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS test_on_off_hbba_subscriber DESTINATION lib/${PROJECT_NAME})
 
 add_executable(test_throttling_hbba_publisher src/hbba_lite_cpp_tests/test_throttling_hbba_publisher.cpp)
-ament_target_dependencies(test_throttling_hbba_publisher rclcpp std_msgs)
+ament_target_dependencies(test_throttling_hbba_publisher rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(test_throttling_hbba_publisher hbba_lite_cpp)
-rosidl_target_interfaces(test_throttling_hbba_publisher ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS test_throttling_hbba_publisher DESTINATION lib/${PROJECT_NAME})
 
 add_executable(test_throttling_hbba_subscriber src/hbba_lite_cpp_tests/test_throttling_hbba_subscriber.cpp)
-ament_target_dependencies(test_throttling_hbba_subscriber rclcpp std_msgs)
+ament_target_dependencies(test_throttling_hbba_subscriber rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(test_throttling_hbba_subscriber hbba_lite_cpp)
-rosidl_target_interfaces(test_throttling_hbba_subscriber ${PROJECT_NAME} "rosidl_typesupport_cpp")
 install(TARGETS test_throttling_hbba_subscriber DESTINATION lib/${PROJECT_NAME})
 
 
@@ -175,10 +156,7 @@ if(BUILD_TESTING)
     test/hbba_lite_cpp/core/HbbaLiteTests.cpp
     test/hbba_lite_cpp/main.cpp
   )
-  ament_target_dependencies(${PROJECT_NAME}_test
-    rclcpp
-    std_msgs
-  )
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
   target_link_libraries(${PROJECT_NAME}_test hbba_lite_cpp)
 endif()
 

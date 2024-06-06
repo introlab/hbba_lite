@@ -145,8 +145,8 @@ class TalkStrategy : public Strategy<TalkDesire>
 {
     std::shared_ptr<DesireSet> m_desireSet;
     std::shared_ptr<rclcpp::Node> m_node;
-    rclcpp::Publisher<talk::msg::Text>::SharedPtr m_talkPublisher;
-    rclcpp::Subscription<talk::msg::Done>::SharedPtr m_talkDoneSubscriber;
+    rclcpp::Publisher<behavior_msgs::msg::Text>::SharedPtr m_talkPublisher;
+    rclcpp::Subscription<behavior_msgs::msg::Done>::SharedPtr m_talkDoneSubscriber;
 
 public:
     TalkStrategy(
@@ -162,13 +162,13 @@ public:
               m_desireSet(move(desireSet)),
               m_node(move(node))
     {
-        m_talkPublisher = node->create_publisher<talk::msg::Text>(
+        m_talkPublisher = node->create_publisher<behavior_msgs::msg::Text>(
             "talk/text",
             rclcpp::QoS(1).transient_local());
-        m_talkDoneSubscriber = node->create_subscription<talk::msg::Done>(
+        m_talkDoneSubscriber = node->create_subscription<behavior_msgs::msg::Done>(
             "talk/done",
             1,
-            [this](const talk::msg::Done::SharedPtr msg) { talkDoneSubscriberCallback(msg); });
+            [this](const behavior_msgs::msg::Done::SharedPtr msg) { talkDoneSubscriberCallback(msg); });
     }
 
     DECLARE_NOT_COPYABLE(TalkStrategy);
@@ -182,14 +182,14 @@ public:
 protected:
     void onEnabling(const TalkDesire& desire) override
     {
-        talk::msg::Text msg;
+        behavior_msgs::msg::Text msg;
         msg.text = desire.text();
         msg.id = desire.id();
         m_talkPublisher->publish(msg);
     }
 
 private:
-    void talkDoneSubscriberCallback(const talk::msg::Done::SharedPtr msg)
+    void talkDoneSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg)
     {
         if (msg->id == desireId())
         {
@@ -525,7 +525,7 @@ This node applies an on/off filter on a topic.
 
 #### Services
 
-- Defined by the parameter `state_service` ([hbba_lite/SetOnOffFilterState](srv/SetOnOffFilterState.srv)): The service to change the filter state.
+- Defined by the parameter `state_service` ([hbba_lite_srvs/SetOnOffFilterState](srv/SetOnOffFilterState.srv)): The service to change the filter state.
 
 ### `throttling_hbba_filter_node`
 
@@ -544,5 +544,5 @@ This node applies a throttling filter on a topic.
 
 #### Services
 
-- Defined by the parameter `state_service` ([hbba_lite/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
+- Defined by the parameter `state_service` ([hbba_lite_srvs/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
   filter state.

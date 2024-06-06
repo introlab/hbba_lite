@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from hbba_lite.srv import SetOnOffFilterState, SetThrottlingFilterState
+from hbba_lite_srvs.srv import SetOnOffFilterState, SetThrottlingFilterState
 
 
 class _HbbaFilterState(ABC):

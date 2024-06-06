@@ -16,12 +16,12 @@ void RosLogStrategyStateLogger::log(DesireType desireType, StrategyType strategy
 
 RosTopicStrategyStateLogger::RosTopicStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(move(node))
 {
-    m_strategyStatePub = m_node->create_publisher<hbba_lite::msg::StrategyState>("hbba_strategy_state_log", 1000);
+    m_strategyStatePub = m_node->create_publisher<hbba_lite_msgs::msg::StrategyState>("hbba_strategy_state_log", 1000);
 }
 
 void RosTopicStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled)
 {
-    hbba_lite::msg::StrategyState msg;
+    hbba_lite_msgs::msg::StrategyState msg;
     msg.desire_type_name = desireType.name();
     msg.strategy_type_name = strategyType.name();
     msg.enabled = enabled;

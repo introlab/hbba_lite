@@ -1,8 +1,8 @@
 #include <hbba_lite/core/RosFilterPool.h>
 #include <hbba_lite/utils/HbbaLiteException.h>
 
-#include <hbba_lite/srv/set_on_off_filter_state.hpp>
-#include <hbba_lite/srv/set_throttling_filter_state.hpp>
+#include <hbba_lite_srvs/srv/set_on_off_filter_state.hpp>
+#include <hbba_lite_srvs/srv/set_throttling_filter_state.hpp>
 
 using namespace std;
 
@@ -20,11 +20,11 @@ void RosFilterPool::add(const string& name, FilterType type)
     switch (type)
     {
         case FilterType::ON_OFF:
-            m_serviceClientsByName[name] = m_node->create_client<hbba_lite::srv::SetOnOffFilterState>(name);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetOnOffFilterState>(name);
             break;
 
         case FilterType::THROTTLING:
-            m_serviceClientsByName[name] = m_node->create_client<hbba_lite::srv::SetThrottlingFilterState>(name);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetThrottlingFilterState>(name);
             break;
 
         default:
@@ -38,18 +38,18 @@ void RosFilterPool::applyEnabling(const string& name, const FilterConfiguration&
     {
         case FilterType::ON_OFF:
         {
-            auto request = make_shared<hbba_lite::srv::SetOnOffFilterState::Request>();
+            auto request = make_shared<hbba_lite_srvs::srv::SetOnOffFilterState::Request>();
             request->is_filtering_all_messages = false;
-            call<hbba_lite::srv::SetOnOffFilterState>(name, request);
+            call<hbba_lite_srvs::srv::SetOnOffFilterState>(name, request);
         }
         break;
 
         case FilterType::THROTTLING:
         {
-            auto request = make_shared<hbba_lite::srv::SetThrottlingFilterState::Request>();
+            auto request = make_shared<hbba_lite_srvs::srv::SetThrottlingFilterState::Request>();
             request->is_filtering_all_messages = false;
             request->rate = configuration.rate();
-            call<hbba_lite::srv::SetThrottlingFilterState>(name, request);
+            call<hbba_lite_srvs::srv::SetThrottlingFilterState>(name, request);
         }
         break;
 
@@ -64,18 +64,18 @@ void RosFilterPool::applyDisabling(const string& name)
     {
         case FilterType::ON_OFF:
         {
-            auto request = make_shared<hbba_lite::srv::SetOnOffFilterState::Request>();
+            auto request = make_shared<hbba_lite_srvs::srv::SetOnOffFilterState::Request>();
             request->is_filtering_all_messages = true;
-            call<hbba_lite::srv::SetOnOffFilterState>(name, request);
+            call<hbba_lite_srvs::srv::SetOnOffFilterState>(name, request);
         }
         break;
 
         case FilterType::THROTTLING:
         {
-            auto request = make_shared<hbba_lite::srv::SetThrottlingFilterState::Request>();
+            auto request = make_shared<hbba_lite_srvs::srv::SetThrottlingFilterState::Request>();
             request->is_filtering_all_messages = true;
             request->rate = 1;
-            call<hbba_lite::srv::SetThrottlingFilterState>(name, request);
+            call<hbba_lite_srvs::srv::SetThrottlingFilterState>(name, request);
         }
         break;
 
