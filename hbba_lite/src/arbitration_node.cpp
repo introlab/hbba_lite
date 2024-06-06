@@ -1,5 +1,4 @@
 #include <rclcpp/rclcpp.hpp>
-#include <rosbag2_generic_topic/rosbag2_node.hpp>
 
 #include <unordered_set>
 #include <optional>
@@ -15,11 +14,11 @@ struct Topic
     rclcpp::Duration timeout;
 };
 
-class ArbitrationNode : public rosbag2_generic_topic::Rosbag2Node
+class ArbitrationNode : public rclcpp::Node
 {
     rclcpp::TimerBase::SharedPtr m_initTimer;
-    vector<shared_ptr<rosbag2_generic_topic::GenericSubscription>> m_subscribers;
-    shared_ptr<rosbag2_generic_topic::GenericPublisher> m_publisher;
+    vector<rclcpp::GenericSubscription::SharedPtr> m_subscribers;
+    rclcpp::GenericPublisher::SharedPtr m_publisher;
 
     vector<Topic> m_topics;
 
@@ -27,7 +26,7 @@ class ArbitrationNode : public rosbag2_generic_topic::Rosbag2Node
     rclcpp::Time m_lastMessageTime;
 
 public:
-    ArbitrationNode() : rosbag2_generic_topic::Rosbag2Node(NODE_NAME), m_lastMessageTime(get_clock()->now())
+    ArbitrationNode() : rclcpp::Node(NODE_NAME), m_lastMessageTime(get_clock()->now())
     {
         m_topics = convertToTopics(
             declare_parameter("topics", vector<string>{}),
@@ -124,7 +123,7 @@ private:
         {
             m_currentTopicIndex = i;
             m_lastMessageTime = get_clock()->now();
-            m_publisher->publish(msg);
+            m_publisher->publish(*msg);
         }
     }
 };

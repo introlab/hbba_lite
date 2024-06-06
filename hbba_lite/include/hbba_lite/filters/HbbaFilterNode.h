@@ -2,12 +2,11 @@
 #define HBBA_FILTER_FILTERS_NODE_H
 
 #include <rclcpp/rclcpp.hpp>
-#include <rosbag2_generic_topic/rosbag2_node.hpp>
 
 #include <hbba_lite/filters/FilterState.h>
 
 template<class FilterState>
-class HbbaFilterNode : public rosbag2_generic_topic::Rosbag2Node
+class HbbaFilterNode : public rclcpp::Node
 {
     std::unique_ptr<FilterState> m_filterState;
 
@@ -16,8 +15,8 @@ class HbbaFilterNode : public rosbag2_generic_topic::Rosbag2Node
     std::string m_stateService;
     rclcpp::TimerBase::SharedPtr m_initTimer;
 
-    std::shared_ptr<rosbag2_generic_topic::GenericSubscription> m_subscriber;
-    std::shared_ptr<rosbag2_generic_topic::GenericPublisher> m_publisher;
+    rclcpp::GenericSubscription::SharedPtr m_subscriber;
+    rclcpp::GenericPublisher::SharedPtr m_publisher;
 
 public:
     HbbaFilterNode(const std::string& nodeName);
@@ -30,7 +29,7 @@ private:
 
 template<class FilterState>
 inline HbbaFilterNode<FilterState>::HbbaFilterNode(const std::string& nodeName)
-    : rosbag2_generic_topic::Rosbag2Node(nodeName)
+    : rclcpp::Node(nodeName)
 {
     m_inputTopic = rclcpp::expand_topic_or_service_name(
         declare_parameter("input_topic", "in"),
@@ -78,7 +77,7 @@ void HbbaFilterNode<FilterState>::initTimerCallback()
         {
             if (m_filterState->check())
             {
-                m_publisher->publish(msg);
+                m_publisher->publish(*msg);
             }
         });
     m_publisher = create_generic_publisher(m_outputTopic, it->second[0], 10);

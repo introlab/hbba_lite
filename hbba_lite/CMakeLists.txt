@@ -24,7 +24,6 @@ find_package(std_msgs REQUIRED)
 find_package(hbba_lite_msgs REQUIRED)
 find_package(hbba_lite_srvs REQUIRED)
 find_package(message_filters REQUIRED)
-find_package(rosbag2_cpp REQUIRED)
 
 # C++ Library
 include_directories(
@@ -59,18 +58,9 @@ target_link_libraries(hbba_lite_cpp
   gecodesupport
 )
 
-
-add_library(rosbag2_generic_topic
-  src/rosbag2_generic_topic/generic_publisher.cpp
-  src/rosbag2_generic_topic/generic_subscription.cpp
-  src/rosbag2_generic_topic/rosbag2_node.cpp
-)
-ament_target_dependencies(rosbag2_generic_topic rclcpp rosbag2_cpp hbba_lite_msgs hbba_lite_srvs)
-target_link_libraries(rosbag2_generic_topic)
-
-ament_export_dependencies(rclcpp rosbag2_cpp hbba_lite_msgs hbba_lite_srvs)
+ament_export_dependencies(rclcpp hbba_lite_msgs hbba_lite_srvs)
 ament_export_include_directories(include)
-ament_export_libraries(hbba_lite_cpp rosbag2_generic_topic)
+ament_export_libraries(hbba_lite_cpp)
 
 install(
   DIRECTORY include/
@@ -78,7 +68,7 @@ install(
 )
 
 install(
-  TARGETS hbba_lite_cpp rosbag2_generic_topic
+  TARGETS hbba_lite_cpp
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -88,17 +78,17 @@ install(
 # C++ Nodes
 add_executable(arbitration_node src/arbitration_node.cpp)
 ament_target_dependencies(arbitration_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
-target_link_libraries(arbitration_node hbba_lite_cpp rosbag2_generic_topic)
+target_link_libraries(arbitration_node hbba_lite_cpp)
 install(TARGETS arbitration_node DESTINATION lib/${PROJECT_NAME})
 
 add_executable(on_off_hbba_filter_node src/on_off_hbba_filter_node.cpp)
 ament_target_dependencies(on_off_hbba_filter_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
-target_link_libraries(on_off_hbba_filter_node hbba_lite_cpp rosbag2_generic_topic)
+target_link_libraries(on_off_hbba_filter_node hbba_lite_cpp)
 install(TARGETS on_off_hbba_filter_node DESTINATION lib/${PROJECT_NAME})
 
 add_executable(throttling_hbba_filter_node src/throttling_hbba_filter_node.cpp)
 ament_target_dependencies(throttling_hbba_filter_node rclcpp std_msgs hbba_lite_msgs hbba_lite_srvs)
-target_link_libraries(throttling_hbba_filter_node hbba_lite_cpp rosbag2_generic_topic)
+target_link_libraries(throttling_hbba_filter_node hbba_lite_cpp)
 install(TARGETS throttling_hbba_filter_node DESTINATION lib/${PROJECT_NAME})
 
 # C++ Test Nodes
