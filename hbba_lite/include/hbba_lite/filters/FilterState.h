@@ -14,6 +14,7 @@ class OnOffHbbaFilterState
 
 public:
     OnOffHbbaFilterState(const std::shared_ptr<rclcpp::Node>& node, const std::string& stateServiceName);
+    OnOffHbbaFilterState(rclcpp::Node& node, const std::string& stateServiceName);
     bool check();
     bool isFilteringAllMessages() const;
 
@@ -37,6 +38,7 @@ class ThrottlingHbbaFilterState
 
 public:
     ThrottlingHbbaFilterState(const std::shared_ptr<rclcpp::Node>& node, const std::string& stateServiceName);
+    ThrottlingHbbaFilterState(rclcpp::Node& node, const std::string& stateServiceName);
     bool check();
     bool isFilteringAllMessages() const;
 

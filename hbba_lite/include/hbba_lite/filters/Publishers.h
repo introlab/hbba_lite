@@ -13,7 +13,12 @@ class HbbaPublisher
 
 public:
     HbbaPublisher(
-        std::shared_ptr<rclcpp::Node>& node,
+        const std::shared_ptr<rclcpp::Node>& node,
+        const std::string& topic,
+        uint32_t queueSize,
+        const std::string& stateServiceName = "");
+    HbbaPublisher(
+        rclcpp::Node& node,
         const std::string& topic,
         uint32_t queueSize,
         const std::string& stateServiceName = "");
@@ -28,13 +33,23 @@ public:
 
 template<class FilterState, class MessageType>
 inline HbbaPublisher<FilterState, MessageType>::HbbaPublisher(
-    std::shared_ptr<rclcpp::Node>& node,
+    const std::shared_ptr<rclcpp::Node>& node,
+    const std::string& topic,
+    uint32_t queueSize,
+    const std::string& stateServiceName)
+    : HbbaPublisher(*node, topic, queueSize, stateServiceName)
+{
+}
+
+template<class FilterState, class MessageType>
+inline HbbaPublisher<FilterState, MessageType>::HbbaPublisher(
+    rclcpp::Node& node,
     const std::string& topic,
     uint32_t queueSize,
     const std::string& stateServiceName)
     : m_filterState(node, stateServiceName == "" ? topic + "/filter_state" : stateServiceName)
 {
-    m_publisher = node->create_publisher<MessageType>(topic, queueSize);
+    m_publisher = node.create_publisher<MessageType>(topic, queueSize);
 }
 
 template<class FilterState, class MessageType>

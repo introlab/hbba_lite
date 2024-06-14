@@ -14,7 +14,13 @@ class HbbaSubscriber
 
 public:
     HbbaSubscriber(
-        std::shared_ptr<rclcpp::Node>& node,
+        const std::shared_ptr<rclcpp::Node>& node,
+        const std::string& topic,
+        uint32_t queueSize,
+        std::function<void(const typename MessageType::SharedPtr)> userCallback,
+        const std::string& stateServiceName = "");
+    HbbaSubscriber(
+        rclcpp::Node& node,
         const std::string& topic,
         uint32_t queueSize,
         std::function<void(const typename MessageType::SharedPtr)> userCallback,
@@ -30,7 +36,18 @@ private:
 
 template<class FilterState, class MessageType>
 HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
-    std::shared_ptr<rclcpp::Node>& node,
+    const std::shared_ptr<rclcpp::Node>& node,
+    const std::string& topic,
+    uint32_t queueSize,
+    std::function<void(const typename MessageType::SharedPtr)> userCallback,
+    const std::string& stateServiceName)
+    : HbbaSubscriber(*node, topic, queueSize, std::move(userCallback), stateServiceName)
+{
+}
+
+template<class FilterState, class MessageType>
+HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
+    rclcpp::Node& node,
     const std::string& topic,
     uint32_t queueSize,
     std::function<void(const typename MessageType::SharedPtr)> userCallback,
@@ -38,7 +55,7 @@ HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
     : m_filterState(node, stateServiceName == "" ? topic + "/filter_state" : stateServiceName),
       m_userCallback(std::move(userCallback))
 {
-    m_subscriber = node->create_subscription<MessageType>(
+    m_subscriber = node.create_subscription<MessageType>(
         topic,
         queueSize,
         [this](const typename MessageType::SharedPtr msg) { callback(msg); });
