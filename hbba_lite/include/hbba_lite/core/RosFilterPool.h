@@ -48,9 +48,9 @@ void RosFilterPool::call(const std::string& name, std::shared_ptr<typename Servi
     }
 
     auto result = client->async_send_request(request);
-    auto futureReturnCode = rclcpp::spin_until_future_complete(m_node, result);
+    result.wait();
 
-    if (futureReturnCode != rclcpp::FutureReturnCode::SUCCESS || !result.get()->ok)
+    if (!result.get()->ok)
     {
         RCLCPP_ERROR(m_node->get_logger(), "The service call has failed (%s)", name.c_str());
     }
