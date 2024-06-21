@@ -25,10 +25,7 @@ find_package(hbba_lite_msgs REQUIRED)
 find_package(hbba_lite_srvs REQUIRED)
 find_package(message_filters REQUIRED)
 
-# C++ Library
-include_directories(
-  include
-)
+file(GLOB_RECURSE HDR_FILES CONFIGURE_DEPENDS "include/hbba_lite/**.h")
 
 add_library(hbba_lite_cpp
   src/hbba_lite_cpp/filters/FilterState.cpp
@@ -44,6 +41,12 @@ add_library(hbba_lite_cpp
   src/hbba_lite_cpp/core/RosStrategyStateLogger.cpp
   src/hbba_lite_cpp/core/HbbaLite.cpp
 )
+target_include_directories(hbba_lite_cpp
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_sources(hbba_lite_cpp PUBLIC FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include FILES ${HDR_FILES})
 ament_target_dependencies(hbba_lite_cpp rclcpp hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(hbba_lite_cpp
   gecodeflatzinc
@@ -57,22 +60,16 @@ target_link_libraries(hbba_lite_cpp
   gecodekernel
   gecodesupport
 )
-
+ament_export_targets(export_hbba_lite_cpp HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp hbba_lite_msgs hbba_lite_srvs)
-ament_export_include_directories(include)
-ament_export_libraries(hbba_lite_cpp)
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
 
 install(
   TARGETS hbba_lite_cpp
+  EXPORT export_hbba_lite_cpp
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  FILE_SET HEADERS
 )
 
 # C++ Nodes
