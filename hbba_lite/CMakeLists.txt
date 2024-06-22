@@ -46,7 +46,6 @@ target_include_directories(hbba_lite_cpp
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_sources(hbba_lite_cpp PUBLIC FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include FILES ${HDR_FILES})
 ament_target_dependencies(hbba_lite_cpp rclcpp hbba_lite_msgs hbba_lite_srvs)
 target_link_libraries(hbba_lite_cpp
   gecodeflatzinc
@@ -69,7 +68,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  FILE_SET HEADERS
+  INCLUDES DESTINATION include
 )
 
 # C++ Nodes
