@@ -25,8 +25,6 @@ find_package(hbba_lite_msgs REQUIRED)
 find_package(hbba_lite_srvs REQUIRED)
 find_package(message_filters REQUIRED)
 
-file(GLOB_RECURSE HDR_FILES CONFIGURE_DEPENDS "include/hbba_lite/**.h")
-
 add_library(hbba_lite_cpp
   src/hbba_lite_cpp/filters/FilterState.cpp
   src/hbba_lite_cpp/utils/HbbaLiteException.cpp
@@ -69,6 +67,11 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
 
 # C++ Nodes
@@ -133,7 +136,7 @@ install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 # Tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(${PROJECT_NAME}_test
+    ament_add_gtest(${PROJECT_NAME}_test
     test/hbba_lite_cpp/core/DesireTests.cpp
     test/hbba_lite_cpp/core/DesireSetTests.cpp
     test/hbba_lite_cpp/core/StrategyTests.cpp
