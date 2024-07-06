@@ -2,7 +2,7 @@
 
 This is a lite version of [HBBA](https://github.com/francoisferland/hbba).
 
-For ROS1, please see the `main-ros1` branch.
+For ROS1, please see the `ros1` branch.
 
 The main differences are :
 
@@ -12,9 +12,6 @@ The main differences are :
 - Two kinds of filters exist: on/off and throttling;
 - It use [Gecode](https://www.gecode.org/) instead of [OR-Tools](https://developers.google.com/optimization) for the
   solver.
-
-## Integrated Code
-The code in `src/rosbag2_generic_topic` and `include/rosbag2_generic_topic` folders are from [rosbag2](https://github.com/ros2/rosbag2) because the generic subscriber and publisher classes are not available in Foxy.
 
 ## Dependencies
 
