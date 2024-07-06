@@ -2,6 +2,8 @@
 
 This is a lite version of [HBBA](https://github.com/francoisferland/hbba).
 
+For ROS1, please see the `ros1` branch.
+
 The main differences are :
 
 - Desires cannot have dependencies;
@@ -139,49 +141,53 @@ Also, the strategy removes the desire of the set once the desire is completed.
 class TalkStrategy : public Strategy<TalkDesire>
 {
     std::shared_ptr<DesireSet> m_desireSet;
-    ros::NodeHandle& m_nodeHandle;
-    ros::Publisher m_talkPublisher;
-    ros::Subscriber m_talkDoneSubscriber;
+    std::shared_ptr<rclcpp::Node> m_node;
+    rclcpp::Publisher<behavior_msgs::msg::Text>::SharedPtr m_talkPublisher;
+    rclcpp::Subscription<behavior_msgs::msg::Done>::SharedPtr m_talkDoneSubscriber;
 
 public:
     TalkStrategy(
-        uint16_t utility, // The utility of the strategy
-        std::shared_ptr<FilterPool> filterPool, // The instance of the class to change the filter state.
+        uint16_t utility,
+        std::shared_ptr<FilterPool> filterPool,
         std::shared_ptr<DesireSet> desireSet,
-        ros::NodeHandle& nodeHandle)
+        std::shared_ptr<rclcpp::Node> node)
         : Strategy<TalkDesire>(
-            utility,
-            {{"sound", 1}}, // Declare the resources used by the strategy.
-            {{"talk/filter_state", FilterConfiguration::onOff()}}, // Declare the filters to enable and their type.
-            move(filterPool)),
-        m_desireSet(move(desireSet)),
-        m_nodeHandle(nodeHandle)
+              utility,
+              {{"sound", 1}},
+              {{"talk/filter_state", FilterConfiguration::onOff()}},
+              move(filterPool)),
+              m_desireSet(move(desireSet)),
+              m_node(move(node))
     {
-        // Create the publisher to send the text to say.
-        m_talkPublisher = nodeHandle.advertise<talk::Text>("talk/text", 1, true);
-
-        // Create the subscriber to be notified when the text has been said.
-        m_talkDoneSubscriber = nodeHandle.subscribe("talk/done", 10, &TalkStrategy::talkDoneSubscriberCallback, this);
+        m_talkPublisher = node->create_publisher<behavior_msgs::msg::Text>(
+            "talk/text",
+            rclcpp::QoS(1).transient_local());
+        m_talkDoneSubscriber = node->create_subscription<behavior_msgs::msg::Done>(
+            "talk/done",
+            1,
+            [this](const behavior_msgs::msg::Done::SharedPtr msg) { talkDoneSubscriberCallback(msg); });
     }
 
     DECLARE_NOT_COPYABLE(TalkStrategy);
     DECLARE_NOT_MOVABLE(TalkStrategy);
 
+    StrategyType strategyType() override
+    {
+        return StrategyType::get<TalkStrategy>();
+    }
+
 protected:
-    // Override the method to publish a message when the strategy is enabled.
     void onEnabling(const TalkDesire& desire) override
     {
-        // Publish the text to be said.
-        talk::Text msg;
+        behavior_msgs::msg::Text msg;
         msg.text = desire.text();
         msg.id = desire.id();
-        m_talkPublisher.publish(msg);
+        m_talkPublisher->publish(msg);
     }
 
 private:
-    void talkDoneSubscriberCallback(const talk::Done::ConstPtr& msg)
+    void talkDoneSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg)
     {
-        // Remove the desire once the text is said.
         if (msg->id == desireId())
         {
             m_desireSet->removeDesire(msg->id);
@@ -367,30 +373,30 @@ HbbaLite hbba(desireSet,
 #### Subscriber
 
 ```cpp
-#include <ros/ros.h>
-#include <std_msgs/Int8.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/Int8.h>
 
 #include <hbba_lite/filters/Subscribers.h>
 
-void callback(const std_msgs::Int8::ConstPtr& msg)
+void callback(const std_msgs::msg::Int8::ConstPtr& msg)
 {
     ROS_INFO("Data received : %i", static_cast<int>(msg->data));
 }
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "node_name");
-    ros::NodeHandle nodeHandle;
+    rclcpp::init(argc, argv);
+    auto node = rclcpp::Node::make_shared("node_name");
 
     // Replace this
-    ros::Subscriber sub = n.subscribe("int_topic", 10, callback);
+    auto sub = node->create_subscription<std_msgs::msg::Int8>("int_topic", 10, callback);
 
     // with this to add an on/off filter
-    OnOffHbbaSubscriber<std_msgs::Int8> sub(nodeHandle, "int_topic", 10, &callback);
+    OnOffHbbaSubscriber<std_msgs::msg::Int8> sub(node, "int_topic", 10, &callback);
 
     // with this to add a throttling filter
-    ThrottlingHbbaSubscriber<std_msgs::Int8> sub(nodeHandle, "int_topic", 10, &callback);
-    ros::spin();
+    ThrottlingHbbaSubscriber<std_msgs::msg::Int8> sub(node, "int_topic", 10, &callback);
+    rclcpp::spin(node);
 
     return 0;
 }
@@ -406,17 +412,17 @@ int main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "node_name");
-    ros::NodeHandle nodeHandle;
+    rclcpp::init(argc, argv);
+    auto node = rclcpp::Node::make_shared("node_name");
 
     // Replace this
-    ros::Publisher pub = n.advertise<std_msgs::Int8>("int_topic", 10);
+    auto pub = node->create_publisher<std_msgs::msg::Int8>("int_topic", 10);
 
     // with this to add an on/off filter
-    OnOffHbbaPublisher<std_msgs::Int8> pub(nodeHandle, "int_topic", 10);
+    OnOffHbbaPublisher<std_msgs::msg::Int8> pub(node, "int_topic", 10);
 
     // with this to add a throttling filter
-    ThrottlingHbbaPublisher<std_msgs::Int8> pub(nodeHandle, "int_topic", 10);
+    ThrottlingHbbaPublisher<std_msgs::msg::Int8> pub(node, "int_topic", 10);
 
     return 0;
 }
@@ -491,8 +497,9 @@ This node applies priority arbitration to topics.
 
 #### Parameters
 
-- `topics`: The topic descriptions containing the topic name (string), priority (int, lower means higher priority) and timeout_s value (double).
-- `latch` (bool): Indicates if the output topic is latched.
+- `topics` (string): The topic names.
+- `priorities` (int): The priority for each topic (int, lower means higher priority).
+- `timeout_s` (double): The timeout in seconds for each topic.
 
 #### Published Topics
 
@@ -502,25 +509,37 @@ This node applies priority arbitration to topics.
 
 This node applies an on/off filter on a topic.
 
+#### Parameters
+
+- `input_topic` (string): The input topic name.
+- `output_topic` (string): The filtered topic name.
+- `state_service` (string): The service name to change the filter state.
+
 #### Topics
 
-- `in` (Any): The input topic.
-- `out` (Any): The filtered topic.
+- Defined by the parameter `input_topic` (Any): The input topic.
+- Defined by the parameter `output_topic` (Any): The filtered topic.
 
 #### Services
 
-- `filter_state` ([hbba_lite/SetOnOffFilterState](srv/SetOnOffFilterState.srv)) The service to change the filter state.
+- Defined by the parameter `state_service` ([hbba_lite_srvs/SetOnOffFilterState](srv/SetOnOffFilterState.srv)): The service to change the filter state.
 
 ### `throttling_hbba_filter_node`
 
 This node applies a throttling filter on a topic.
 
+#### Parameters
+
+- `input_topic` (string): The input topic name.
+- `output_topic` (string): The filtered topic name.
+- `state_service` (string): The service name to change the filter state.
+
 #### Topics
 
-- `in` (Any): The input topic.
-- `out` (Any): The filtered topic.
+- Defined by the parameter `input_topic` (Any): The input topic.
+- Defined by the parameter `output_topic` (Any): The filtered topic.
 
 #### Services
 
-- `filter_state` ([hbba_lite/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
+- Defined by the parameter `state_service` ([hbba_lite_srvs/SetThrottlingFilterState](srv/SetThrottlingFilterState.srv)) The service to change the
   filter state.

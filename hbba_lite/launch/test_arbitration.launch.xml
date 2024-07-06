@@ -1,0 +1,25 @@
+<launch>
+    <node pkg="hbba_lite" exec="test_arbitration_publisher.py" name="publisher_1" output="screen">
+        <param name="rate" value="0.05"/>
+
+        <remap from="cmd" to="publisher_1/cmd"/>
+    </node>
+    <node pkg="hbba_lite" exec="test_arbitration_publisher.py" name="publisher_2" output="screen">
+        <param name="rate" value="0.25"/>
+
+        <remap from="cmd" to="publisher_2/cmd"/>
+    </node>
+    <node pkg="hbba_lite" exec="test_arbitration_publisher.py" name="publisher_3" output="screen">
+        <param name="rate" value="1.0"/>
+
+        <remap from="cmd" to="publisher_3/cmd"/>
+    </node>
+
+    <node pkg="hbba_lite" exec="arbitration_node" name="arbitration_node" output="screen">
+        <param name="topics" value="[publisher_1/cmd, publisher_2/cmd, publisher_3/cmd]"/>
+        <param name="priorities" value="[1, 2, 3]"/>
+        <param name="timeout_s" value="[10.0, 2.0, 1.0]"/>
+
+        <remap from="out" to="cmd"/>
+    </node>
+</launch>
