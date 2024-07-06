@@ -17,11 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: catkin_ws/src/hbba_lite
+          path: colcon_ws/src/hbba_lite
 
       - uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: foxy
+          required-ros-distributions: humble
 
       - name: Install system dependencies
         run: |
@@ -29,14 +29,14 @@ jobs:
           sudo apt-get install libgecode-dev
 
       - name: Compile packages in ROS workspace
-        working-directory: catkin_ws
+        working-directory: colcon_ws
         run: |
           source /opt/ros/noetic/setup.bash
           colcon build
 
       - name: Run tests
-        working-directory: catkin_ws
+        working-directory: colcon_ws
         run: |
-          source /opt/ros/foxy/setup.bash
+          source /opt/ros/humble/setup.bash
           colcon test --packages-up-to hbba_lite
           colcon test-result --all --verbose
