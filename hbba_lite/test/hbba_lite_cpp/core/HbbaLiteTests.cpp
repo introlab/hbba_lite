@@ -28,7 +28,7 @@ public:
     virtual unordered_set<SolverResult> solve(
         const vector<unique_ptr<Desire>>& desires,
         const unordered_map<DesireType, vector<unique_ptr<BaseStrategy>>>& strategiesByDesireType,
-        const unordered_map<string, uint16_t>& systemResourcesByName)
+        const unordered_map<string, uint16_t>& systemResourcesByName) override
     {
         if (desires.empty())
         {

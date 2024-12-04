@@ -36,7 +36,7 @@ DesireSetTransaction DesireSet::beginTransaction()
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     m_isTransactionStarted = true;
-    return move(DesireSetTransaction(*this, move(lock)));
+    return DesireSetTransaction(*this, move(lock));
 }
 
 uint64_t DesireSet::addDesire(unique_ptr<Desire>&& desire)
