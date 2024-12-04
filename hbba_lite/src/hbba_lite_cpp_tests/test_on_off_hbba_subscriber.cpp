@@ -12,7 +12,7 @@ int main(int argc, char** argv)
         node,
         "int_topic_1",
         10,
-        [node](const hbba_lite_msgs::msg::Int32Stamped::SharedPtr msg)
+        [node](const hbba_lite_msgs::msg::Int32Stamped::ConstSharedPtr msg)
         { RCLCPP_INFO(node->get_logger(), "Data received : %i", static_cast<int>(msg->data)); });
 
     rclcpp::spin(node);
