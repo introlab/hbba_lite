@@ -284,7 +284,7 @@ inline void Strategy<T>::onEnabling(const Desire& desire)
 }
 
 template<class T>
-inline void Strategy<T>::onEnabling(const T& desire)
+inline void Strategy<T>::onEnabling([[maybe_unused]] const T& desire)
 {
 }
 

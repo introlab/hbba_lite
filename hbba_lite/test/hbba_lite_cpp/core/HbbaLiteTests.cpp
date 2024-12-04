@@ -68,7 +68,7 @@ class StrategyStateLoggerMock : public StrategyStateLogger
 public:
     static vector<pair<DesireType, bool>> loggedValues;
 
-    void log(DesireType desireType, StrategyType strategyType, bool enabled) override
+    void log(DesireType desireType, [[maybe_unused]] StrategyType strategyType, bool enabled) override
     {
         loggedValues.emplace_back(desireType, enabled);
     }
@@ -178,7 +178,7 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
         desireSet->removeDesire(id);
 
         auto desire2 = make_unique<DesireD>();
-        auto id2 = desire2->id();
+        [[maybe_unused]] auto id2 = desire2->id();
         desireSet->addDesire(move(desire2));
     }
 
@@ -232,7 +232,7 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
         desireSet->removeDesire(id);
 
         auto desire2 = make_unique<DesireD>();
-        auto id2 = desire2->id();
+        [[maybe_unused]] auto id2 = desire2->id();
         desireSet->addDesire(move(desire2));
     }
 
@@ -277,15 +277,15 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldOnlyReturnDesireNameWithBiggestIn
         desireSet->beginTransaction();
 
         auto desireB = make_unique<DesireB>(2);
-        auto idB = desireB->id();
+        [[maybe_unused]] auto idB = desireB->id();
         desireSet->addDesire(move(desireB));
 
         auto desireC = make_unique<DesireC>();
-        auto idC = desireC->id();
+        [[maybe_unused]] auto idC = desireC->id();
         desireSet->addDesire(move(desireC));
 
         auto desireD = make_unique<DesireD>();
-        auto idD = desireD->id();
+        [[maybe_unused]] auto idD = desireD->id();
         desireSet->addDesire(move(desireD));
     }
 

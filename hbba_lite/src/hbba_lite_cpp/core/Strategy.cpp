@@ -110,7 +110,7 @@ BaseStrategy::BaseStrategy(
     }
 }
 
-void BaseStrategy::onEnabling(const Desire& desire)
+void BaseStrategy::onEnabling([[maybe_unused]] const Desire& desire)
 {
     for (auto& pair : m_filterConfigurationsByName)
     {

@@ -165,7 +165,7 @@ vector<unique_ptr<Desire>> DesireSet::getEnabledDesires()
     return enabledDesires;
 }
 
-void DesireSet::callObservers(unique_lock<recursive_mutex> desireLock)
+void DesireSet::callObservers([[maybe_unused]] unique_lock<recursive_mutex> desireLock)
 {
     if (!m_hasChanged || m_isTransactionStarted)
     {

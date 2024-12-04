@@ -4,4 +4,4 @@ StrategyStateLogger::StrategyStateLogger() {}
 
 NoOpStrategyStateLogger::NoOpStrategyStateLogger() {}
 
-void NoOpStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled) {}
+void NoOpStrategyStateLogger::log([[maybe_unused]] DesireType desireType, [[maybe_unused]] StrategyType strategyType, [[maybe_unused]] bool enabled) {}

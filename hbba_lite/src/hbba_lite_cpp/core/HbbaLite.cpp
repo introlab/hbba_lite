@@ -131,7 +131,7 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
             // The strategy must be enabled, but it is disabled
             toBeEnabled ||
             // The strategy is already enabled for another desire, so it must be disabled then enabled.
-            strategy->enabled() && strategy->desireId() != desire->id())
+            (strategy->enabled() && strategy->desireId() != desire->id()))
         {
             strategiesToEnable.emplace_back(result.strategyIndex, desire);
         }
