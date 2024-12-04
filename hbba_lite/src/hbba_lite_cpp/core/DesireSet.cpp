@@ -6,7 +6,7 @@ using namespace std;
 
 DesireSetTransaction::DesireSetTransaction(DesireSet& desireSet, unique_lock<recursive_mutex>&& lock)
     : m_desireSet(desireSet),
-      m_lock(move(lock))
+      m_lock(std::move(lock))
 {
 }
 
@@ -14,7 +14,7 @@ DesireSetTransaction::~DesireSetTransaction()
 {
     if (m_lock.owns_lock())
     {
-        m_desireSet.endTransaction(move(m_lock));
+        m_desireSet.endTransaction(std::move(m_lock));
     }
 }
 
@@ -36,7 +36,7 @@ DesireSetTransaction DesireSet::beginTransaction()
 {
     unique_lock<recursive_mutex> lock(m_desireMutex);
     m_isTransactionStarted = true;
-    return DesireSetTransaction(*this, move(lock));
+    return DesireSetTransaction(*this, std::move(lock));
 }
 
 uint64_t DesireSet::addDesire(unique_ptr<Desire>&& desire)
@@ -44,10 +44,10 @@ uint64_t DesireSet::addDesire(unique_ptr<Desire>&& desire)
     unique_lock<recursive_mutex> lock(m_desireMutex);
 
     uint64_t id = desire->id();
-    m_desiresById[id] = move(desire);
+    m_desiresById[id] = std::move(desire);
 
     m_hasChanged = true;
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 
     return id;
 }
@@ -59,7 +59,7 @@ void DesireSet::removeDesire(uint64_t id)
     {
         m_hasChanged = true;
     }
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 void DesireSet::clear()
@@ -70,7 +70,7 @@ void DesireSet::clear()
         m_hasChanged = true;
     }
     m_desiresById.clear();
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 void DesireSet::removeAllDesiresOfType(DesireType type)
@@ -94,7 +94,7 @@ void DesireSet::removeAllDesiresOfType(DesireType type)
     {
         m_hasChanged = true;
     }
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 bool DesireSet::containsAnyDesiresOfType(DesireType type)
@@ -122,7 +122,7 @@ void DesireSet::enableAllDesires()
             m_hasChanged = true;
         }
     }
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 void DesireSet::disableAllDesires()
@@ -137,13 +137,13 @@ void DesireSet::disableAllDesires()
             m_hasChanged = true;
         }
     }
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 void DesireSet::endTransaction(unique_lock<recursive_mutex> lock)
 {
     m_isTransactionStarted = false;
-    callObservers(move(lock));
+    callObservers(std::move(lock));
 }
 
 vector<unique_ptr<Desire>> DesireSet::getEnabledDesires()

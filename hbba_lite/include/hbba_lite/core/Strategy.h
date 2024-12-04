@@ -260,7 +260,7 @@ Strategy<T>::Strategy(
     std::unordered_map<std::string, uint16_t> resourcesByName,
     std::unordered_map<std::string, FilterConfiguration> filterConfigurationByName,
     std::shared_ptr<FilterPool> filterPool)
-    : BaseStrategy(utility, move(resourcesByName), move(filterConfigurationByName), move(filterPool))
+    : BaseStrategy(utility, std::move(resourcesByName), std::move(filterConfigurationByName), std::move(filterPool))
 {
 }
 

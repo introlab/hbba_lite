@@ -7,7 +7,7 @@
 using namespace std;
 
 RosFilterPool::RosFilterPool(shared_ptr<rclcpp::Node> node, bool waitForService)
-    : m_node(move(node)),
+    : m_node(std::move(node)),
       m_waitForService(waitForService)
 {
 }
@@ -85,8 +85,8 @@ void RosFilterPool::applyDisabling(const string& name)
 }
 
 RosLogFilterPoolDecorator::RosLogFilterPoolDecorator(shared_ptr<rclcpp::Node> node, unique_ptr<FilterPool> filterPool)
-    : m_node(move(node)),
-      m_filterPool(move(filterPool))
+    : m_node(std::move(node)),
+      m_filterPool(std::move(filterPool))
 {
 }
 

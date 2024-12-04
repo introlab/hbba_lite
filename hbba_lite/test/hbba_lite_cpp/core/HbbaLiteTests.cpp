@@ -88,10 +88,10 @@ TEST(HbbaLiteTests, constructor_invalidResourceName_shouldThrowHbbaLiteException
     auto solver = make_unique<SolverMock>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategy));
+    strategies.emplace_back(std::move(strategy));
 
 
-    EXPECT_THROW(HbbaLite(desireSet, move(strategies), {}, move(solver)), HbbaLiteException);
+    EXPECT_THROW(HbbaLite(desireSet, std::move(strategies), {}, std::move(solver)), HbbaLiteException);
 }
 
 TEST(HbbaLiteTests, constructor_invalidResourceCount_shouldThrowHbbaLiteException)
@@ -106,10 +106,10 @@ TEST(HbbaLiteTests, constructor_invalidResourceCount_shouldThrowHbbaLiteExceptio
     auto solver = make_unique<SolverMock>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategy));
+    strategies.emplace_back(std::move(strategy));
 
 
-    EXPECT_THROW(HbbaLite(desireSet, move(strategies), {{"ra", 9}}, move(solver)), HbbaLiteException);
+    EXPECT_THROW(HbbaLite(desireSet, std::move(strategies), {{"ra", 9}}, std::move(solver)), HbbaLiteException);
 }
 
 TEST(HbbaLiteTests, onDesireSetChange_shouldEnableDisableStrategies)
@@ -124,13 +124,13 @@ TEST(HbbaLiteTests, onDesireSetChange_shouldEnableDisableStrategies)
     auto solver = make_unique<SolverMock>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategy));
+    strategies.emplace_back(std::move(strategy));
 
-    HbbaLite testee(desireSet, move(strategies), {{"ra", 10}}, move(solver));
+    HbbaLite testee(desireSet, std::move(strategies), {{"ra", 10}}, std::move(solver));
 
     auto desire = make_unique<DesireD>();
     auto id = desire->id();
-    desireSet->addDesire(move(desire));
+    desireSet->addDesire(std::move(desire));
     this_thread::sleep_for(20ms);
     EXPECT_EQ(filterPool->counts["fa"], 1);
 
@@ -158,14 +158,14 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
     auto solver = make_unique<GecodeSolver>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategyC));
-    strategies.emplace_back(move(strategyD));
+    strategies.emplace_back(std::move(strategyC));
+    strategies.emplace_back(std::move(strategyD));
 
-    HbbaLite testee(desireSet, move(strategies), {{"ra", 10}}, move(solver));
+    HbbaLite testee(desireSet, std::move(strategies), {{"ra", 10}}, std::move(solver));
 
     auto desire = make_unique<DesireC>();
     auto id = desire->id();
-    desireSet->addDesire(move(desire));
+    desireSet->addDesire(std::move(desire));
     this_thread::sleep_for(20ms);
 
     vector<string> expectedStrategies = {
@@ -179,7 +179,7 @@ TEST(HbbaLiteTests, getActiveStrategies_shouldReturnActiveStrategies)
 
         auto desire2 = make_unique<DesireD>();
         [[maybe_unused]] auto id2 = desire2->id();
-        desireSet->addDesire(move(desire2));
+        desireSet->addDesire(std::move(desire2));
     }
 
     this_thread::sleep_for(20ms);
@@ -212,14 +212,14 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
     auto solver = make_unique<GecodeSolver>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategyC));
-    strategies.emplace_back(move(strategyD));
+    strategies.emplace_back(std::move(strategyC));
+    strategies.emplace_back(std::move(strategyD));
 
-    HbbaLite testee(desireSet, move(strategies), {{"ra", 10}}, move(solver));
+    HbbaLite testee(desireSet, std::move(strategies), {{"ra", 10}}, std::move(solver));
 
     auto desire = make_unique<DesireC>();
     auto id = desire->id();
-    desireSet->addDesire(move(desire));
+    desireSet->addDesire(std::move(desire));
     this_thread::sleep_for(20ms);
 
     vector<string> expectedDesireNames = {
@@ -233,7 +233,7 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldReturnActiveDesireName)
 
         auto desire2 = make_unique<DesireD>();
         [[maybe_unused]] auto id2 = desire2->id();
-        desireSet->addDesire(move(desire2));
+        desireSet->addDesire(std::move(desire2));
     }
 
     this_thread::sleep_for(20ms);
@@ -267,26 +267,26 @@ TEST(HbbaLiteTests, getActiveDesireNames_shouldOnlyReturnDesireNameWithBiggestIn
     auto solver = make_unique<GecodeSolver>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategyB));
-    strategies.emplace_back(move(strategyC));
-    strategies.emplace_back(move(strategyD));
+    strategies.emplace_back(std::move(strategyB));
+    strategies.emplace_back(std::move(strategyC));
+    strategies.emplace_back(std::move(strategyD));
 
-    HbbaLite testee(desireSet, move(strategies), {{"ra", 1}}, move(solver));
+    HbbaLite testee(desireSet, std::move(strategies), {{"ra", 1}}, std::move(solver));
 
     {
         desireSet->beginTransaction();
 
         auto desireB = make_unique<DesireB>(2);
         [[maybe_unused]] auto idB = desireB->id();
-        desireSet->addDesire(move(desireB));
+        desireSet->addDesire(std::move(desireB));
 
         auto desireC = make_unique<DesireC>();
         [[maybe_unused]] auto idC = desireC->id();
-        desireSet->addDesire(move(desireC));
+        desireSet->addDesire(std::move(desireC));
 
         auto desireD = make_unique<DesireD>();
         [[maybe_unused]] auto idD = desireD->id();
-        desireSet->addDesire(move(desireD));
+        desireSet->addDesire(std::move(desireD));
     }
 
     this_thread::sleep_for(20ms);
@@ -308,9 +308,14 @@ TEST(HbbaLiteTests, strategyStateLogger_shouldBeCalledWhenStrategiesAreEnabledOr
     auto solver = make_unique<GecodeSolver>();
 
     vector<unique_ptr<BaseStrategy>> strategies;
-    strategies.emplace_back(move(strategyB));
+    strategies.emplace_back(std::move(strategyB));
 
-    HbbaLite testee(desireSet, move(strategies), {{"ra", 1}}, move(solver), make_unique<StrategyStateLoggerMock>());
+    HbbaLite testee(
+        desireSet,
+        std::move(strategies),
+        {{"ra", 1}},
+        std::move(solver),
+        make_unique<StrategyStateLoggerMock>());
     EXPECT_EQ(StrategyStateLoggerMock::loggedValues.size(), 0);
 
     desireSet->addDesire<DesireB>(1);
