@@ -9,21 +9,21 @@ template<class FilterState, class MessageType>
 class HbbaSubscriber
 {
     FilterState m_filterState;
-    std::function<void(const typename MessageType::SharedPtr)> m_userCallback;
-    typename rclcpp::Subscription<MessageType>::SharedPtr m_subscriber;
+    std::function<void(const typename MessageType::ConstSharedPtr)> m_userCallback;
+    typename rclcpp::Subscription<MessageType>::ConstSharedPtr m_subscriber;
 
 public:
     HbbaSubscriber(
         const std::shared_ptr<rclcpp::Node>& node,
         const std::string& topic,
         uint32_t queueSize,
-        std::function<void(const typename MessageType::SharedPtr)> userCallback,
+        std::function<void(const typename MessageType::ConstSharedPtr)> userCallback,
         const std::string& stateServiceName = "");
     HbbaSubscriber(
         rclcpp::Node& node,
         const std::string& topic,
         uint32_t queueSize,
-        std::function<void(const typename MessageType::SharedPtr)> userCallback,
+        std::function<void(const typename MessageType::ConstSharedPtr)> userCallback,
         const std::string& stateServiceName = "");
 
     std::string getTopic() const;
@@ -31,7 +31,7 @@ public:
     bool isFilteringAllMessages() const;
 
 private:
-    void callback(const typename MessageType::SharedPtr msg);
+    void callback(const typename MessageType::ConstSharedPtr msg);
 };
 
 template<class FilterState, class MessageType>
@@ -39,7 +39,7 @@ HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
     const std::shared_ptr<rclcpp::Node>& node,
     const std::string& topic,
     uint32_t queueSize,
-    std::function<void(const typename MessageType::SharedPtr)> userCallback,
+    std::function<void(const typename MessageType::ConstSharedPtr)> userCallback,
     const std::string& stateServiceName)
     : HbbaSubscriber(*node, topic, queueSize, std::move(userCallback), stateServiceName)
 {
@@ -50,7 +50,7 @@ HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
     rclcpp::Node& node,
     const std::string& topic,
     uint32_t queueSize,
-    std::function<void(const typename MessageType::SharedPtr)> userCallback,
+    std::function<void(const typename MessageType::ConstSharedPtr)> userCallback,
     const std::string& stateServiceName)
     : m_filterState(node, stateServiceName == "" ? topic + "/filter_state" : stateServiceName),
       m_userCallback(std::move(userCallback))
@@ -58,7 +58,7 @@ HbbaSubscriber<FilterState, MessageType>::HbbaSubscriber(
     m_subscriber = node.create_subscription<MessageType>(
         topic,
         queueSize,
-        [this](const typename MessageType::SharedPtr msg) { callback(msg); });
+        [this](const typename MessageType::ConstSharedPtr msg) { callback(msg); });
 }
 
 template<class FilterState, class MessageType>
@@ -73,7 +73,7 @@ bool HbbaSubscriber<FilterState, MessageType>::isFilteringAllMessages() const
 }
 
 template<class FilterState, class MessageType>
-void HbbaSubscriber<FilterState, MessageType>::callback(const typename MessageType::SharedPtr msg)
+void HbbaSubscriber<FilterState, MessageType>::callback(const typename MessageType::ConstSharedPtr msg)
 {
     if (m_filterState.check() && m_userCallback)
     {

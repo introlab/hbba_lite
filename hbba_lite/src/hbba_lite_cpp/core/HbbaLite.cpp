@@ -11,10 +11,10 @@ HbbaLite::HbbaLite(
     unordered_map<string, uint16_t> resourcesByNames,
     unique_ptr<Solver> solver,
     unique_ptr<StrategyStateLogger> strategyStateLogger)
-    : m_desireSet(move(desireSet)),
-      m_resourcesByNames(move(resourcesByNames)),
-      m_solver(move(solver)),
-      m_strategyStateLogger(move(strategyStateLogger)),
+    : m_desireSet(std::move(desireSet)),
+      m_resourcesByNames(std::move(resourcesByNames)),
+      m_solver(std::move(solver)),
+      m_strategyStateLogger(std::move(strategyStateLogger)),
       m_stopped(false)
 {
     if (sem_init(&m_pendingDesiresSemaphore, 0, 0) == -1)
@@ -25,7 +25,7 @@ HbbaLite::HbbaLite(
     for (auto& strategy : strategies)
     {
         checkStrategyResources(strategy->desireType(), strategy->resourcesByName());
-        m_strategiesByDesireType[strategy->desireType()].emplace_back(move(strategy));
+        m_strategiesByDesireType[strategy->desireType()].emplace_back(std::move(strategy));
     }
 
     m_thread = make_unique<thread>(&HbbaLite::run, this);
@@ -92,7 +92,7 @@ void HbbaLite::run()
             }
             if (desires.has_value())
             {
-                updateStrategies(move(*desires));
+                updateStrategies(std::move(*desires));
             }
         }
     }
@@ -131,7 +131,7 @@ void HbbaLite::updateStrategies(vector<unique_ptr<Desire>> desires)
             // The strategy must be enabled, but it is disabled
             toBeEnabled ||
             // The strategy is already enabled for another desire, so it must be disabled then enabled.
-            strategy->enabled() && strategy->desireId() != desire->id())
+            (strategy->enabled() && strategy->desireId() != desire->id()))
         {
             strategiesToEnable.emplace_back(result.strategyIndex, desire);
         }
@@ -210,7 +210,7 @@ void HbbaLite::updateActiveStrategies(
             }
         }
         s.append("})");
-        m_activeStrategies.emplace(move(s));
+        m_activeStrategies.emplace(std::move(s));
     }
 }
 

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-RosLogStrategyStateLogger::RosLogStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(move(node)) {}
+RosLogStrategyStateLogger::RosLogStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(std::move(node)) {}
 
 void RosLogStrategyStateLogger::log(DesireType desireType, StrategyType strategyType, bool enabled)
 {
@@ -14,7 +14,7 @@ void RosLogStrategyStateLogger::log(DesireType desireType, StrategyType strategy
 }
 
 
-RosTopicStrategyStateLogger::RosTopicStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(move(node))
+RosTopicStrategyStateLogger::RosTopicStrategyStateLogger(std::shared_ptr<rclcpp::Node> node) : m_node(std::move(node))
 {
     m_strategyStatePub = m_node->create_publisher<hbba_lite_msgs::msg::StrategyState>("hbba_strategy_state_log", 1000);
 }

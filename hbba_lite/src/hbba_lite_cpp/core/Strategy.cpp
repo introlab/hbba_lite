@@ -100,9 +100,9 @@ BaseStrategy::BaseStrategy(
     : m_enabled(false),
       m_desireId(nullopt),
       m_utility(utility),
-      m_resourcesByName(move(resourcesByName)),
-      m_filterConfigurationsByName(move(filterConfigurationsByName)),
-      m_filterPool(move(filterPool))
+      m_resourcesByName(std::move(resourcesByName)),
+      m_filterConfigurationsByName(std::move(filterConfigurationsByName)),
+      m_filterPool(std::move(filterPool))
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
@@ -110,7 +110,7 @@ BaseStrategy::BaseStrategy(
     }
 }
 
-void BaseStrategy::onEnabling(const Desire& desire)
+void BaseStrategy::onEnabling([[maybe_unused]] const Desire& desire)
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
