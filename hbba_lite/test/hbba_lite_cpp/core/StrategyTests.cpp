@@ -45,6 +45,19 @@ protected:
     }
 };
 
+class StrategyNull : public Strategy<DesireD>
+{
+
+public:
+    StrategyTestee(shared_ptr<FilterPoolMock> filterPool)
+        : Strategy(1, {}, {}, filterPool)
+    {
+    }
+
+    ~StrategyTestee() override = default;
+
+};
+
 TEST(FilterConfigurationTests, constructor_invalidRate_shouldThrowHbbaLiteException)
 {
     EXPECT_THROW(FilterConfiguration::throttling(0), HbbaLiteException);
@@ -117,6 +130,7 @@ TEST(FilterPoolTests, disable_invalidName_shouldThrowHbbaLiteException)
 TEST(FilterPoolTests, enableDisable_shouldCallOnMethodOnce)
 {
     StrategyType type = StrategyType::get<StrategyTestee>();
+    StrategyType typeNull = StrategyType::get<StrategyNull>();
 
     FilterPoolMock testee;
     testee.add("a", FilterType::THROTTLING);
@@ -129,12 +143,29 @@ TEST(FilterPoolTests, enableDisable_shouldCallOnMethodOnce)
     EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 1);
 
-    testee.disable(type, "a");
+    testee.disable(typeNull, "a");
     EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 1);
 
     testee.disable(type, "a");
-    EXPECT_NE(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.counts["a"], 0);
+
+
+    testee.enable(type, "a", FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.counts["a"], 1);
+
+    testee.enable(typeNull, "a", FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.counts["a"], 1);
+
+    testee.disable(typeNull, "a");
+    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.counts["a"], 1);
+
+    testee.disable(type, "a");
+    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 0);
 }
 
