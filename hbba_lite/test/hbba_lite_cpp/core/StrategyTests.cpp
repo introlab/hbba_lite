@@ -148,7 +148,7 @@ TEST(FilterPoolTests, enableDisable_shouldCallOnMethodOnce)
     EXPECT_EQ(testee.counts["a"], 1);
 
     testee.disable(type, "a");
-    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.enabledFilters.count("a"), 0);
     EXPECT_EQ(testee.counts["a"], 0);
 
 
@@ -165,7 +165,7 @@ TEST(FilterPoolTests, enableDisable_shouldCallOnMethodOnce)
     EXPECT_EQ(testee.counts["a"], 1);
 
     testee.disable(type, "a");
-    EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
+    EXPECT_EQ(testee.enabledFilters.count("a"), 0);
     EXPECT_EQ(testee.counts["a"], 0);
 }
 
