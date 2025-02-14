@@ -1,7 +1,5 @@
 #include <hbba_lite/core/Strategy.h>
 
-#include <hbba_lite/utils/HbbaLiteException.h>
-
 #include <limits>
 
 using namespace std;
@@ -53,12 +51,6 @@ void FilterPool::enable(const StrategyType& type, const string& name, const Filt
 {
     lock_guard<recursive_mutex> lock(m_mutex);
 
-    // We don't want to enable the filter if it is already enabled by the strategy.
-    if (m_enabledFilterStrategies.count({name, type}) != 0)
-    {
-        return;
-    }
-
     auto it = m_countsByName.find(name);
     if (it == m_countsByName.end())
     {
@@ -67,6 +59,12 @@ void FilterPool::enable(const StrategyType& type, const string& name, const Filt
     if (m_typesByName[name] != configuration.type())
     {
         throw HbbaLiteException("Not compatible filter configuration (" + name + ")");
+    }
+
+    // We don't want to enable the filter if it is already enabled by the strategy.
+    if (m_enabledFilterStrategies.count({name, type}) != 0)
+    {
+        return;
     }
 
     if (it->second == 0)

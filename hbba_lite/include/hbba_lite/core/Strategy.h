@@ -3,6 +3,7 @@
 
 #include <hbba_lite/core/Desire.h>
 #include <hbba_lite/utils/ClassMacros.h>
+#include <hbba_lite/utils/HbbaLiteException.h>
 
 #include <cstdint>
 #include <unordered_map>
@@ -209,8 +210,6 @@ class BaseStrategy
     uint16_t m_utility;
     std::unordered_map<std::string, uint16_t> m_resourcesByName;
     std::unordered_map<std::string, FilterConfiguration> m_filterConfigurationsByName;
-
-protected:
     std::shared_ptr<FilterPool> m_filterPool;
 
 public:
@@ -240,6 +239,9 @@ public:
 protected:
     virtual void onEnabling(const Desire& desire);
     virtual void onDisabling();
+
+    void enableFilter(const std::string& name);
+    void disableFilter(const std::string& name);
 };
 
 inline uint16_t BaseStrategy::utility() const
@@ -287,6 +289,31 @@ inline const std::unordered_map<std::string, FilterConfiguration> BaseStrategy::
     return m_filterConfigurationsByName;
 }
 
+inline void BaseStrategy::enableFilter(const std::string& name)
+{
+    auto it = m_filterConfigurationsByName.find(name);
+    if (it != m_filterConfigurationsByName.end())
+    {
+        m_filterPool->enable(strategyType(), name, it->second);
+    }
+    else
+    {
+        throw HbbaLiteException("Cannot enable filter, filter does not exist (name=" + name + ")");
+    }
+}
+
+inline void BaseStrategy::disableFilter(const std::string& name)
+{
+    auto it = m_filterConfigurationsByName.find(name);
+    if (it != m_filterConfigurationsByName.end())
+    {
+        m_filterPool->disable(strategyType(), name);
+    }
+    else
+    {
+        throw HbbaLiteException("Cannot disable filter, filter does not exist (name=" + name + ")");
+    }
+}
 
 template<class T>
 class Strategy : public BaseStrategy
