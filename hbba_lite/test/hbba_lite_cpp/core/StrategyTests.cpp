@@ -83,48 +83,53 @@ TEST(FilterPoolTests, add_invalidType_shouldThrowHbbaLiteException)
 
 TEST(FilterPoolTests, enable_invalidName_shouldThrowHbbaLiteException)
 {
+    StrategyType type = StrategyType::get<StrategyTestee>();
     FilterPoolMock testee;
-    EXPECT_THROW(testee.enable("a", FilterConfiguration::onOff()), HbbaLiteException);
+    EXPECT_THROW(testee.enable(type, "a", FilterConfiguration::onOff()), HbbaLiteException);
 }
 
 TEST(FilterPoolTests, enable_invalidConfiguration_shouldThrowHbbaLiteException)
 {
+    StrategyType type = StrategyType::get<StrategyTestee>();
     FilterPoolMock testee;
     testee.add("a", FilterType::THROTTLING);
-    EXPECT_THROW(testee.enable("a", FilterConfiguration::onOff()), HbbaLiteException);
+    EXPECT_THROW(testee.enable(type, "a", FilterConfiguration::onOff()), HbbaLiteException);
 
-    testee.enable("a", FilterConfiguration::throttling(10));
-    EXPECT_THROW(testee.enable("a", FilterConfiguration::throttling(5)), HbbaLiteException);
+    testee.enable(type, "a", FilterConfiguration::throttling(10));
+    EXPECT_THROW(testee.enable(type, "a", FilterConfiguration::throttling(5)), HbbaLiteException);
 
-    testee.disable("a");
-    testee.enable("a", FilterConfiguration::throttling(5));
-    EXPECT_THROW(testee.enable("a", FilterConfiguration::throttling(10)), HbbaLiteException);
+    testee.disable(type, "a");
+    testee.enable(type, "a", FilterConfiguration::throttling(5));
+    EXPECT_THROW(testee.enable(type, "a", FilterConfiguration::throttling(10)), HbbaLiteException);
 }
 
 TEST(FilterPoolTests, disable_invalidName_shouldThrowHbbaLiteException)
 {
+    StrategyType type = StrategyType::get<StrategyTestee>();
     FilterPoolMock testee;
-    EXPECT_THROW(testee.disable("a"), HbbaLiteException);
+    EXPECT_THROW(testee.disable(type, "a"), HbbaLiteException);
 }
 
 TEST(FilterPoolTests, enableDisable_shouldCallOnMethodOnce)
 {
+    StrategyType type = StrategyType::get<StrategyTestee>();
+
     FilterPoolMock testee;
     testee.add("a", FilterType::THROTTLING);
 
-    testee.enable("a", FilterConfiguration::throttling(1));
+    testee.enable(type, "a", FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 1);
 
-    testee.enable("a", FilterConfiguration::throttling(1));
+    testee.enable(type, "a", FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 1);
 
-    testee.disable("a");
+    testee.disable(type, "a");
     EXPECT_EQ(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 1);
 
-    testee.disable("a");
+    testee.disable(type, "a");
     EXPECT_NE(testee.enabledFilters["a"], FilterConfiguration::throttling(1));
     EXPECT_EQ(testee.counts["a"], 0);
 }
