@@ -49,12 +49,12 @@ class StrategyNull : public Strategy<DesireD>
 {
 
 public:
-    StrategyTestee(shared_ptr<FilterPoolMock> filterPool)
+    StrategyNull(shared_ptr<FilterPoolMock> filterPool)
         : Strategy(1, {}, {}, filterPool)
     {
     }
 
-    ~StrategyTestee() override = default;
+    ~StrategyNull() override = default;
 
 };
 
@@ -174,8 +174,8 @@ TEST(StrategyTests, getters_shouldReturnTheRightValues)
     const unordered_map<string, uint16_t> EXPECTED_RESOURCES({{"a", 1}, {"b", 2}});
     const unordered_map<string, FilterConfiguration> EXPECTED_FILTER_CONFIGURATIONS(
         {{"c", FilterConfiguration::throttling(1)},
-         {"d", FilterConfiguration::throttling(2)}},
-         {"e", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)});
+         {"d", FilterConfiguration::throttling(2)},
+         {"e", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)}});
 
     auto filterPool = make_shared<FilterPoolMock>();
     StrategyTestee testee(filterPool);
