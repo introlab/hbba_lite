@@ -19,7 +19,11 @@ public:
         : Strategy(
               1,
               {{"a", 1}, {"b", 2}},
-              {{"c", FilterConfiguration::throttling(1)}, {"d", FilterConfiguration::throttling(2)}},
+              {
+                  {"c", FilterConfiguration::throttling(1)},
+                  {"d", FilterConfiguration::throttling(2)},
+                  {"e", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)}
+              },
               filterPool),
           onEnablingCount(0),
           onDisablingCount(0)
@@ -138,7 +142,9 @@ TEST(StrategyTests, getters_shouldReturnTheRightValues)
 {
     const unordered_map<string, uint16_t> EXPECTED_RESOURCES({{"a", 1}, {"b", 2}});
     const unordered_map<string, FilterConfiguration> EXPECTED_FILTER_CONFIGURATIONS(
-        {{"c", FilterConfiguration::throttling(1)}, {"d", FilterConfiguration::throttling(2)}});
+        {{"c", FilterConfiguration::throttling(1)},
+         {"d", FilterConfiguration::throttling(2)}},
+         {"e", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)});
 
     auto filterPool = make_shared<FilterPoolMock>();
     StrategyTestee testee(filterPool);

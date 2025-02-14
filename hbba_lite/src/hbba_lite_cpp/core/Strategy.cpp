@@ -61,12 +61,6 @@ void FilterPool::enable(const StrategyType& type, const string& name, const Filt
         throw HbbaLiteException("Not compatible filter configuration (" + name + ")");
     }
 
-    // We don't want to enable the filter if it is already enabled by the strategy.
-    if (m_enabledFilterStrategies.count({name, type}) != 0)
-    {
-        return;
-    }
-
     if (it->second == 0)
     {
         applyEnabling(name, configuration);
@@ -75,6 +69,12 @@ void FilterPool::enable(const StrategyType& type, const string& name, const Filt
     else if (configuration != m_lastFilterConfigurationByName[name])
     {
         throw HbbaLiteException("Not compatible filter configuration (" + name + ")");
+    }
+
+    // We don't want to enable the filter if it is already enabled by the strategy.
+    if (m_enabledFilterStrategies.count({name, type}) != 0)
+    {
+        return;
     }
 
     m_enabledFilterStrategies.insert({name, type});
@@ -86,18 +86,17 @@ void FilterPool::disable(const StrategyType& type, const string& name)
 {
     lock_guard<recursive_mutex> lock(m_mutex);
 
-    // We don't want to decrement the counter if the filter is not enabled by the strategy.
-    if (m_enabledFilterStrategies.count({name, type}) == 0)
-    {
-        return;
-    }
-
     auto it = m_countsByName.find(name);
     if (it == m_countsByName.end())
     {
         throw HbbaLiteException("Not existing filter (" + name + ")");
     }
 
+    // We don't want to decrement the counter if the filter is not enabled by the strategy.
+    if (m_enabledFilterStrategies.count({name, type}) == 0)
+    {
+        return;
+    }
 
     m_enabledFilterStrategies.erase({name, type});
 
