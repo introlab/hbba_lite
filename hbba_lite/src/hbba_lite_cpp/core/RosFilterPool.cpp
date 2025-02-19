@@ -8,7 +8,8 @@ using namespace std;
 
 RosFilterPool::RosFilterPool(shared_ptr<rclcpp::Node> node, bool waitForService)
     : m_node(move(node)),
-      m_waitForService(waitForService)
+      m_waitForService(waitForService),
+      m_callbackGroup(m_node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive))
 {
 }
 
@@ -20,11 +21,13 @@ void RosFilterPool::add(const string& name, FilterType type)
     switch (type)
     {
         case FilterType::ON_OFF:
-            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetOnOffFilterState>(name);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetOnOffFilterState>(name,
+                rmw_qos_profile_services_default, m_callbackGroup);
             break;
 
         case FilterType::THROTTLING:
-            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetThrottlingFilterState>(name);
+            m_serviceClientsByName[name] = m_node->create_client<hbba_lite_srvs::srv::SetThrottlingFilterState>(name,
+                rmw_qos_profile_services_default, m_callbackGroup);
             break;
 
         default:
