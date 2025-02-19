@@ -2,4 +2,4 @@
 
 using namespace std;
 
-Motivation::Motivation(shared_ptr<DesireSet> desireSet) : m_desireSet(move(desireSet)) {}
+Motivation::Motivation(shared_ptr<DesireSet> desireSet) : m_desireSet(std::move(desireSet)) {}
