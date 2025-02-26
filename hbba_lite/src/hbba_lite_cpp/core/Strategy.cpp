@@ -1,17 +1,29 @@
 #include <hbba_lite/core/Strategy.h>
 
-#include <hbba_lite/utils/HbbaLiteException.h>
-
 #include <limits>
 
 using namespace std;
 
 StrategyType::StrategyType(type_index type) : m_type(type) {}
 
+FilterConfiguration::FilterConfiguration()
+    : m_type(FilterType::ON_OFF),
+      m_rate(0),
+      m_defaultState(FilterConfiguration::DefaultState::ENABLED)
+{
+}
 
-FilterConfiguration::FilterConfiguration() : m_type(FilterType::ON_OFF), m_rate(0) {}
+FilterConfiguration::FilterConfiguration(FilterConfiguration::DefaultState defaultState)
+    : m_type(FilterType::ON_OFF),
+      m_rate(0),
+      m_defaultState(defaultState)
+{
+}
 
-FilterConfiguration::FilterConfiguration(uint16_t rate) : m_type(FilterType::THROTTLING), m_rate(rate)
+FilterConfiguration::FilterConfiguration(uint16_t rate, FilterConfiguration::DefaultState defaultState)
+    : m_type(FilterType::THROTTLING),
+      m_rate(rate),
+      m_defaultState(defaultState)
 {
     if (rate == 0)
     {
@@ -35,7 +47,7 @@ void FilterPool::add(const string& name, FilterType type)
     }
 }
 
-void FilterPool::enable(const string& name, const FilterConfiguration& configuration)
+void FilterPool::enable(const StrategyType& type, const string& name, const FilterConfiguration& configuration)
 {
     lock_guard<recursive_mutex> lock(m_mutex);
 
@@ -59,10 +71,18 @@ void FilterPool::enable(const string& name, const FilterConfiguration& configura
         throw HbbaLiteException("Not compatible filter configuration (" + name + ")");
     }
 
+    // We don't want to enable the filter if it is already enabled by the strategy.
+    if (m_enabledFilterStrategies.count({name, type}) != 0)
+    {
+        return;
+    }
+
+    m_enabledFilterStrategies.insert({name, type});
+
     it->second++;
 }
 
-void FilterPool::disable(const string& name)
+void FilterPool::disable(const StrategyType& type, const string& name)
 {
     lock_guard<recursive_mutex> lock(m_mutex);
 
@@ -71,6 +91,14 @@ void FilterPool::disable(const string& name)
     {
         throw HbbaLiteException("Not existing filter (" + name + ")");
     }
+
+    // We don't want to decrement the counter if the filter is not enabled by the strategy.
+    if (m_enabledFilterStrategies.count({name, type}) == 0)
+    {
+        return;
+    }
+
+    m_enabledFilterStrategies.erase({name, type});
 
     it->second--;
     if (it->second == 0)
@@ -114,7 +142,10 @@ void BaseStrategy::onEnabling([[maybe_unused]] const Desire& desire)
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
-        m_filterPool->enable(pair.first, pair.second);
+        if (pair.second.defaultState() == FilterConfiguration::DefaultState::ENABLED)
+        {
+            m_filterPool->enable(strategyType(), pair.first, pair.second);
+        }
     }
 }
 
@@ -122,6 +153,6 @@ void BaseStrategy::onDisabling()
 {
     for (auto& pair : m_filterConfigurationsByName)
     {
-        m_filterPool->disable(pair.first);
+        m_filterPool->disable(strategyType(), pair.first);
     }
 }

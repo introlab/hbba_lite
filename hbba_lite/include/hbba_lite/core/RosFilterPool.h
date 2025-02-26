@@ -10,6 +10,7 @@
 class RosFilterPool : public FilterPool
 {
     std::shared_ptr<rclcpp::Node> m_node;
+    rclcpp::CallbackGroup::SharedPtr m_callbackGroup;
     bool m_waitForService;
 
     std::unordered_map<std::string, rclcpp::ClientBase::SharedPtr> m_serviceClientsByName;
@@ -49,7 +50,6 @@ void RosFilterPool::call(const std::string& name, std::shared_ptr<typename Servi
 
     auto result = client->async_send_request(request);
     result.wait();
-
     if (!result.get()->ok)
     {
         RCLCPP_ERROR(m_node->get_logger(), "The service call has failed (%s)", name.c_str());

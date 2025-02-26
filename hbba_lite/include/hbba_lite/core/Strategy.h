@@ -3,9 +3,11 @@
 
 #include <hbba_lite/core/Desire.h>
 #include <hbba_lite/utils/ClassMacros.h>
+#include <hbba_lite/utils/HbbaLiteException.h>
 
 #include <cstdint>
 #include <unordered_map>
+#include <set>
 #include <typeindex>
 #include <string>
 #include <mutex>
@@ -20,12 +22,50 @@ class StrategyType
 
     explicit StrategyType(std::type_index type);
 
+
 public:
     template<class T>
     static StrategyType get();
 
     const char* name() const;
+
+    bool operator==(const StrategyType& other) const;
+    bool operator!=(const StrategyType& other) const;
+    bool operator<(const StrategyType& other) const;
+    bool operator<=(const StrategyType& other) const;
+    bool operator>(const StrategyType& other) const;
+    bool operator>=(const StrategyType& other) const;
 };
+
+inline bool StrategyType::operator==(const StrategyType& other) const
+{
+    return m_type == other.m_type;
+}
+
+inline bool StrategyType::operator!=(const StrategyType& other) const
+{
+    return m_type != other.m_type;
+}
+
+inline bool StrategyType::operator<(const StrategyType& other) const
+{
+    return m_type < other.m_type;
+}
+
+inline bool StrategyType::operator<=(const StrategyType& other) const
+{
+    return m_type <= other.m_type;
+}
+
+inline bool StrategyType::operator>(const StrategyType& other) const
+{
+    return m_type > other.m_type;
+}
+
+inline bool StrategyType::operator>=(const StrategyType& other) const
+{
+    return m_type >= other.m_type;
+}
 
 template<class T>
 inline StrategyType StrategyType::get()
@@ -61,18 +101,29 @@ inline std::string filterTypeToString(FilterType filterType)
 
 class FilterConfiguration
 {
+public:
+    enum class DefaultState
+    {
+        ENABLED,
+        DISABLED
+    };
+
+private:
     FilterType m_type;
     uint16_t m_rate;
+    DefaultState m_defaultState;
 
 public:
     FilterConfiguration();
-    explicit FilterConfiguration(uint16_t rate);
+    explicit FilterConfiguration(DefaultState defaultState);
+    FilterConfiguration(uint16_t rate, DefaultState defaultState);
 
     FilterType type() const;
     uint16_t rate() const;
+    DefaultState defaultState() const;
 
-    static FilterConfiguration onOff();
-    static FilterConfiguration throttling(uint16_t rate);
+    static FilterConfiguration onOff(DefaultState defaultState = DefaultState::ENABLED);
+    static FilterConfiguration throttling(uint16_t rate, DefaultState defaultState = DefaultState::ENABLED);
 
     friend bool operator==(const FilterConfiguration& a, const FilterConfiguration& b);
     friend bool operator!=(const FilterConfiguration& a, const FilterConfiguration& b);
@@ -88,14 +139,19 @@ inline uint16_t FilterConfiguration::rate() const
     return m_rate;
 }
 
-inline FilterConfiguration FilterConfiguration::onOff()
+inline FilterConfiguration::DefaultState FilterConfiguration::defaultState() const
 {
-    return FilterConfiguration();
+    return m_defaultState;
 }
 
-inline FilterConfiguration FilterConfiguration::throttling(uint16_t rate)
+inline FilterConfiguration FilterConfiguration::onOff(DefaultState defaultState)
 {
-    return FilterConfiguration(rate);
+    return FilterConfiguration(defaultState);
+}
+
+inline FilterConfiguration FilterConfiguration::throttling(uint16_t rate, DefaultState defaultState)
+{
+    return FilterConfiguration(rate, defaultState);
 }
 
 inline bool operator==(const FilterConfiguration& a, const FilterConfiguration& b)
@@ -118,6 +174,7 @@ inline bool operator!=(const FilterConfiguration& a, const FilterConfiguration& 
 class FilterPool
 {
     std::unordered_map<std::string, int> m_countsByName;
+    std::set<std::pair<std::string, StrategyType>> m_enabledFilterStrategies;
 
 protected:
     std::unordered_map<std::string, FilterType> m_typesByName;
@@ -133,8 +190,8 @@ public:
     DECLARE_NOT_MOVABLE(FilterPool);
 
     virtual void add(const std::string& name, FilterType type);
-    void enable(const std::string& name, const FilterConfiguration& configuration);
-    void disable(const std::string& name);
+    void enable(const StrategyType& type, const std::string& name, const FilterConfiguration& configuration);
+    void disable(const StrategyType& type, const std::string& name);
 
 protected:
     virtual void applyEnabling(const std::string& name, const FilterConfiguration& configuration) = 0;
@@ -153,8 +210,6 @@ class BaseStrategy
     uint16_t m_utility;
     std::unordered_map<std::string, uint16_t> m_resourcesByName;
     std::unordered_map<std::string, FilterConfiguration> m_filterConfigurationsByName;
-
-protected:
     std::shared_ptr<FilterPool> m_filterPool;
 
 public:
@@ -184,6 +239,9 @@ public:
 protected:
     virtual void onEnabling(const Desire& desire);
     virtual void onDisabling();
+
+    void enableFilter(const std::string& name);
+    void disableFilter(const std::string& name);
 };
 
 inline uint16_t BaseStrategy::utility() const
@@ -231,6 +289,31 @@ inline const std::unordered_map<std::string, FilterConfiguration> BaseStrategy::
     return m_filterConfigurationsByName;
 }
 
+inline void BaseStrategy::enableFilter(const std::string& name)
+{
+    auto it = m_filterConfigurationsByName.find(name);
+    if (it != m_filterConfigurationsByName.end())
+    {
+        m_filterPool->enable(strategyType(), name, it->second);
+    }
+    else
+    {
+        throw HbbaLiteException("Cannot enable filter, filter does not exist (name=" + name + ")");
+    }
+}
+
+inline void BaseStrategy::disableFilter(const std::string& name)
+{
+    auto it = m_filterConfigurationsByName.find(name);
+    if (it != m_filterConfigurationsByName.end())
+    {
+        m_filterPool->disable(strategyType(), name);
+    }
+    else
+    {
+        throw HbbaLiteException("Cannot disable filter, filter does not exist (name=" + name + ")");
+    }
+}
 
 template<class T>
 class Strategy : public BaseStrategy
